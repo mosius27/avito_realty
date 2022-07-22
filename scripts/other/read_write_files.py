@@ -57,12 +57,9 @@ def init_excel():
     worksheet = workbook.active
     return workbook, worksheet
 
-    # return globals()['workbook'], globals()['worksheet']
-
 def write_line_excel(workbook, worksheet, path: str, var: str):
     worksheet.append(var.split(';'))
     workbook.save(path)
-    return worksheet
 
 def load_yaml(path: str):
     with open(path, 'r', encoding='utf-8') as file: return yaml.load(file, Loader=yaml.FullLoader)

@@ -38,7 +38,7 @@ def Backup(self, backup, paths: str):
         except: self.logger.info(f'Файл {paths[file].split("/")[-1]} по указанному пути {paths[file]} не обнаружен')
 
 def work_process(self, target):
-    self.logger = Carprice.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
+    self.logger = AvitoRealty.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
     with self.lock:
         if self.parse_settings['method'] == 'selenium':
             self.driver = start_browser(self)
@@ -86,7 +86,7 @@ def read_write_data(self, **kwargs):
                 working_with_file.write_csv(path=kwargs['path'], var=kwargs['var'], fieldnames=kwargs['header'])
 
             if '.xlsx' in kwargs['path']:
-                self.worksheet = working_with_file.write_line_excel(self.workbook, self.worksheet, path=kwargs['path'], var=kwargs['var'])
+                working_with_file.write_line_excel(self.workbook, self.worksheet, path=kwargs['path'], var=kwargs['var'])
             
             if '.txt' in kwargs['path']:
                 working_with_file.write_list_in_txt(path=kwargs['path'], var=kwargs['var'])
@@ -159,7 +159,7 @@ class AvitoRealty():
     def start(self):
         self.event = multiprocessing.Event()
         if self.multiprocess_settings['use multiprocessing'] == False:
-            self.logger = Carprice.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
+            self.logger = AvitoRealty.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
             self.logger.info('Начало выполнения программы в один процесс')
             if self.numCycles == 0:
                 self.logger.info('Начало выполнения цикла пока не будет закрыта программа')
@@ -179,7 +179,7 @@ class AvitoRealty():
             if self.multiprocess_settings['num process'] > 1:
                 self.process()
             elif self.multiprocess_settings['num process'] == 1:
-                self.logger = Carprice.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
+                self.logger = AvitoRealty.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
                 self.logger.info('Начало выполнения программы в один процесс')
                 if self.numCycles == 0:
                     self.logger.info('Начало выполнения цикла пока не будет закрыта программа')
@@ -226,7 +226,7 @@ class AvitoRealty():
 
             try: ad_info = Check_ad.check_ad_browser(url=ad, driver=self.driver)
             except:
-                self.logger.error('Не удалось получить данные объявления {}'.format(traceback.format_exception()))
+                self.logger.error('Не удалось получить данные объявления {}'.format(traceback.format_exc()))
                 time_pause = time_wait(self.delay)
                 self.logger.info(f'Ожидание: {time_pause} сек')
                 time.sleep(time_pause)
@@ -331,7 +331,7 @@ class AvitoRealty():
                             ads.append(ad)
 
                     self.logger.info(f'Всего ссылок на объявления: {len(ads)}')
-                except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exception()))
+                except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
                 finally:
                     self.event.clear()
                     if self.parse_settings['check new ad on processed'] == True:
@@ -369,7 +369,7 @@ class AvitoRealty():
                                 ads.append(ad)
 
                     self.logger.info(f'Собрано ссылок: {len(ads)}')
-                except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exception()))
+                except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
                 finally:
                     self.event.clear()
                     if self.parse_settings['check new ad on processed'] == True:
@@ -412,5 +412,5 @@ class AvitoRealty():
             proc.join()
 
 if __name__ == "__main__":
-    carprice = Carprice()
+    carprice = AvitoRealty()
     carprice.start()
