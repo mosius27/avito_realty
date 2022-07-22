@@ -1,0 +1,5 @@
+Process-1 | log time - 2022-07-22 17:12:55 | log level - INFO | [main.py: line - 54 in function work_process] | Начало выполнения 1 кол-ва циклов
+Process-1 | log time - 2022-07-22 17:12:59 | log level - INFO | [main.py: line - 322 in function get_and_save_links_on_ad] | Номер страницы: 1
+Process-1 | log time - 2022-07-22 17:13:03 | log level - INFO | [main.py: line - 333 in function get_and_save_links_on_ad] | Всего ссылок на объявления: 181
+Process-1 | log time - 2022-07-22 17:13:03 | log level - INFO | [main.py: line - 347 in function get_and_save_links_on_ad] | Ожидание: 10 сек
+Process-1 | log time - 2022-07-22 17:13:14 | log level - INFO | [main.py: line - 57 in function work_process] | Цикл сбора ссылок завершен. Ожидание 60 сек.

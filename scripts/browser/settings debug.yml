@@ -1,0 +1,43 @@
+chrome:
+  arguments:
+    headless:
+      name: '--headless'
+      activity: False
+    user agent:
+      name: '--user-agent'
+      value: 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
+      activity: True
+    window size:
+      name: '--window-size'
+      value: '324,576'
+      activity: False
+    disable blink features:
+      name: '--disable-blink-features'
+      value: 'AutomationControlled'
+      activity: True
+    log level:
+      name: '--log-level'
+      value: 3
+      activity: True
+
+  experimental option:
+    images:
+      category: prefs
+      name: profile.managed_default_content_settings.images
+      value: 2
+      activity: True
+    notifications: 
+      category: prefs
+      name: profile.managed_default_content_settings.notifications
+      value: 2
+      activity: True
+    geolocation: 
+      category: prefs
+      name: profile.managed_default_content_settings.geolocation
+      value: 2
+      activity: True
+    enable-automation:
+      category: excludeSwitches
+      name: enable-automation
+      value: None
+      activity: True

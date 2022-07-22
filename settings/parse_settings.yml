@@ -1,0 +1,64 @@
+# Способ сбора данных(Может принимать значения):
+# selenium - запускает сбор данных через selenium driver
+
+method: !!str selenium
+
+# Заголовки для записи в файл
+headers: !!str Дата публикации;Заголовок;Описание;Цена;Регион;Город;Адрес;url;Изображения;Характеристики
+
+# Очищать результат работы предыдущего сбора
+clear prev result: True
+
+# Расположение файлов и папок
+paths:
+  result: !!str ./data/result/result
+  ads link: !!str ./data/links/ads.json
+  processed links: !!str ./data/links/processed.json
+  browser settings: !!str ./settings/browser_settings.yml
+  create search link settings: !!str ./settings/createSearchLink_settings.yml
+  multiprocess settings: !!str ./settings/multiprocess_settings.yml
+  proxy: !!str ./data/proxy.txt
+  links for get data: !!str ./data/links/links.txt
+  log folder: !!str ./data/logs/
+
+log level: info
+
+# Количество страниц для сбора объявлении по каждой из ссылок
+# 0 - Собирать все страницы
+num_pages: !!int 1
+
+# Формат сохраняемого файла
+# csv - сохранять данные в формате csv (Не поддерживает запись многострочного текста в одну ячейку)
+# json - сохранять данные в формате json
+# excel - сохранять данные в формате excel
+result format: !!str excel
+
+# Сохранять объявления которые проверялись
+save checked ads: !!bool True
+
+# Осуществлять проверку объявлений с теми которые уже собирались
+check new ad on processed: !!bool True
+
+# Перемешивать ссылки на объявления после процесса сбора
+shuffle ads: !!bool True
+
+# Задержка между загрузкой страниц в секундах
+delay: 
+  from: !!int 10
+  to: !!int 10
+
+# Использовать прокси при сборе
+using proxy: !!bool True
+
+cycles:
+  # Количество циклов сбора ссылок объявлений(Не может быть отрицательным значением или строковым значением)
+  # 0 - Выполнение пока не будет выполено закрытие программы
+  nums: !!int 1
+  # задрежка между циклами сбора ссылок
+  delay_between_cycles: !!int 60
+  # Очередь выполения функций цикла
+  # get ads - собирать ссылки объявлений
+  # ad info - собирать информацию из объявлений
+  run_queue: 
+    - get ads
+    - ad info
