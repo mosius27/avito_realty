@@ -3,7 +3,7 @@
 import yaml
 import json
 import csv
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 import logging
 
 def initLogger(path: str, logLvl: str):
@@ -52,13 +52,20 @@ def write_csv(path: str, var: dict, fieldnames: str):
         writer = csv.DictWriter(file, fieldnames=fieldnames.split(';'), delimiter=';', skipinitialspace=True, dialect = 'excel')
         writer.writerow(var)
 
-def init_excel():
+def create_excel(path: str):
     workbook = Workbook()
-    worksheet = workbook.active
-    return workbook, worksheet
+    workbook.save(path)
 
-def write_line_excel(workbook, worksheet, path: str, var: str):
-    worksheet.append(var.split(';'))
+def write_line_excel(path: str, var: str, num_row: int=None):
+    workbook = load_workbook(path)
+    worksheet = workbook.active
+    if num_row != None:
+        line = var.split(';')
+        col = 1
+        for value in line:
+            worksheet.cell(row=num_row, column=col, value=value)
+            col += 1
+    else: worksheet.append(var.split(';'))
     workbook.save(path)
 
 def load_yaml(path: str):

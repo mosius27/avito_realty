@@ -9,7 +9,8 @@ import os
 import sys
 import traceback
 import multiprocessing
-from multiprocessing import Process, RLock, Pool
+from multiprocessing import Process, RLock
+from datetime import datetime, timedelta
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 def time_wait(delay):
@@ -40,25 +41,25 @@ def Backup(self, backup, paths: str):
 def work_process(self, target):
     self.logger = AvitoRealty.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
     with self.lock:
-        if self.parse_settings['method'] == 'selenium':
+        if self.method.value == 'selenium':
             self.driver = start_browser(self)
     if target == 'get ads':
-        if self.numCycles == 0:
+        if self.numCycles.value == 0:
             self.logger.info('Начало выполнения цикла пока не будет закрыта программа')
             while True:
                 self.get_and_save_links_on_ad()
                 self.logger.info(f'Цикл сбора ссылок завершен. Ожидание {self.parse_settings["cycles"]["delay_between_cycles"]} сек.')
                 self.event.set()
                 time.sleep(self.parse_settings["cycles"]["delay_between_cycles"])
-        elif self.numCycles > 0:
-            self.logger.info('Начало выполнения {} кол-ва циклов'.format(self.numCycles))
-            for i in range(int(self.numCycles)):
+        elif self.numCycles.value > 0:
+            self.logger.info('Начало выполнения {} кол-ва циклов'.format(self.numCycles.value))
+            for i in range(int(self.numCycles.value)):
                 self.get_and_save_links_on_ad()
                 self.logger.info(f'Цикл сбора ссылок завершен. Ожидание {self.parse_settings["cycles"]["delay_between_cycles"]} сек.')
                 self.event.set()
                 time.sleep(self.parse_settings["cycles"]["delay_between_cycles"])
         
-        elif self.numCycles < 0:
+        elif self.numCycles.value < 0:
             self.logger.info('Значение cycles/nums в файле self.parse_settings не может быть отрицательным')
 
     elif target == 'ad info':
@@ -86,7 +87,7 @@ def read_write_data(self, **kwargs):
                 working_with_file.write_csv(path=kwargs['path'], var=kwargs['var'], fieldnames=kwargs['header'])
 
             if '.xlsx' in kwargs['path']:
-                working_with_file.write_line_excel(self.workbook, self.worksheet, path=kwargs['path'], var=kwargs['var'])
+                working_with_file.write_line_excel(path=kwargs['path'], var=kwargs['var'])
             
             if '.txt' in kwargs['path']:
                 working_with_file.write_list_in_txt(path=kwargs['path'], var=kwargs['var'])
@@ -121,31 +122,36 @@ class AvitoRealty():
 
         # при выставлении в настройках True будут создаваться резервные копии указанных файлов
         self.lock = RLock()
+
+        manager = multiprocessing.Manager()
+
+        self.proxyes = manager.list(read_write_data(self, path=self.paths['proxy'], action='read'))
         self.proxyes = read_write_data(self, path=self.paths['proxy'], action='read')
         self.generator_search_link = read_write_data(self, path=self.paths['create search link settings'], action='read')
         self.search_link = create_search_link.createSearchLink(self.generator_search_link)
         self.multiprocess_settings = read_write_data(self, path=self.paths['multiprocess settings'], action='read')
         # self.search_links = read_write_data(self, path=self.parse_settings['paths']['links for get data'], action='read')
+        self.header = manager.Value('', value=self.parse_settings['headers'])
         if self.parse_settings['result format'] == 'csv' and (self.parse_settings['clear prev result'] == True or f'{self.paths["result"].split("/")[-1]}.csv' not in os.listdir('./data/result/')):
-            working_with_file.create_csv(f'{self.paths["result"]}.csv', self.parse_settings['headers'])
+            working_with_file.create_csv(f'{self.paths["result"]}.csv', self.header)
         
         if self.parse_settings['result format'] == 'excel' and (self.parse_settings['clear prev result'] == True or f'{self.paths["result"].split("/")[-1]}.xlsx' not in os.listdir('./data/result/')):
-            self.workbook, self.worksheet = working_with_file.init_excel()
-            read_write_data(self, path=f'{self.paths["result"]}.xlsx', var=self.parse_settings['headers'], action='write')
+            working_with_file.create_excel(path=f'{self.paths["result"]}.xlsx')
+            working_with_file.write_line_excel(path=f'{self.paths["result"]}.xlsx', var=self.header.value, num_row=1)
 
         if self.parse_settings['result format'] == 'json' and (self.parse_settings['clear prev result'] == True or f'{self.paths["result"].split("/")[-1]}.json' not in os.listdir('./data/result/')):
             read_write_data(self, path=f'{self.paths["result"]}.json', var=[], action='write')
 
-        self.numCycles = self.parse_settings['cycles']['nums']
-        self.delay = self.parse_settings['delay']
-        self.method = self.parse_settings['method']
+        self.numCycles = manager.Value('', self.parse_settings['cycles']['nums'])
+        self.delay = manager.Value('', self.parse_settings['delay'])
+        self.method = manager.Value('', self.parse_settings['method'])
 
     def cycle(self):
-        if self.parse_settings['method'] == 'selenium':
+        if self.method.value == 'selenium':
             self.driver = start_browser(self)
 
         queue_parse = self.parse_settings['cycles']['run_queue']
-
+        self.event.set()
         for i in queue_parse:
             if i == 'get ads':
                 self.get_and_save_links_on_ad()
@@ -161,17 +167,17 @@ class AvitoRealty():
         if self.multiprocess_settings['use multiprocessing'] == False:
             self.logger = AvitoRealty.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
             self.logger.info('Начало выполнения программы в один процесс')
-            if self.numCycles == 0:
+            if self.numCycles.value == 0:
                 self.logger.info('Начало выполнения цикла пока не будет закрыта программа')
                 while True:
                     self.cycle()
 
-            elif self.numCycles > 0:
-                self.logger.info('Начало выполнения {} кол-ва циклов'.format(self.numCycles))
-                for i in range(int(self.numCycles)):
+            elif self.numCycles.value > 0:
+                self.logger.info('Начало выполнения {} кол-ва циклов'.format(self.numCycles.value))
+                for i in range(int(self.numCycles.value)):
                     self.cycle()
             
-            elif self.numCycles < 0:
+            elif self.numCycles.value < 0:
                 self.logger.info('Значение cycles/nums в файле self.parse_settings не может быть отрицательным')
                 exit()
         
@@ -181,17 +187,17 @@ class AvitoRealty():
             elif self.multiprocess_settings['num process'] == 1:
                 self.logger = AvitoRealty.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
                 self.logger.info('Начало выполнения программы в один процесс')
-                if self.numCycles == 0:
+                if self.numCycles.value == 0:
                     self.logger.info('Начало выполнения цикла пока не будет закрыта программа')
                     while True:
                         self.cycle()
 
-                elif self.numCycles > 0:
-                    self.logger.info('Начало выполнения {} кол-ва циклов'.format(self.numCycles))
-                    for i in range(int(self.numCycles)):
+                elif self.numCycles.value > 0:
+                    self.logger.info('Начало выполнения {} кол-ва циклов'.format(self.numCycles.value))
+                    for i in range(int(self.numCycles.value)):
                         self.cycle()
                 
-                elif self.numCycles < 0:
+                elif self.numCycles.value < 0:
                     self.logger.info('Значение cycles/nums в файле self.parse_settings не может быть отрицательным')
                     exit()
 
@@ -227,7 +233,7 @@ class AvitoRealty():
             try: ad_info = Check_ad.check_ad_browser(url=ad, driver=self.driver)
             except:
                 self.logger.error('Не удалось получить данные объявления {}'.format(traceback.format_exc()))
-                time_pause = time_wait(self.delay)
+                time_pause = time_wait(self.delay.value)
                 self.logger.info(f'Ожидание: {time_pause} сек')
                 time.sleep(time_pause)
                 continue
@@ -243,13 +249,19 @@ class AvitoRealty():
 
                     params = ad_info['paramsDto']['items']
                     param_str = ''
-                    for param in params:
-                        try:
-                            if '*' in param['description']: param_str += f'{params[-1]["title"]}: {ad_info["contextItem"]["raw_params"][str(params[-1]["attributeId"]).replace("&nbsp;", " ")]}\n'
-                            else: param_str += f'{param["title"]}: {param["description"].replace("&nbsp;", " ")};'
-                        except: 
-                            self.logger.info('Не удалось обработать параметр {}'.format(param))
-                            continue
+                    with self.lock:
+                        header = self.header.value.split(';')
+                        param_dict = {}
+                        for param in params:
+                            if param["title"] not in header:
+                                self.header.value += f';{param["title"]}'
+                                working_with_file.write_line_excel(path=f'{self.paths["result"]}.xlsx', var=self.header.value, num_row=1)
+                            try:
+                                if '*' in param['description']: param_dict[param["title"]] = ad_info["contextItem"]["raw_params"][str(params[param]["attributeId"]).replace("&nbsp;", " ")]
+                                else: param_dict[param["title"]] = param["description"].replace("&nbsp;", " ")
+                            except: 
+                                self.logger.info('Не удалось обработать параметр {}'.format(param))
+                                continue
 
 
                     description = ad_info['contextItem']['description']
@@ -258,10 +270,6 @@ class AvitoRealty():
                     for tag in list(tag_for_delete.keys()):
                         description = description.replace(tag, tag_for_delete[tag])
 
-                    client_phone = ad_info['item']['phone']['publicPhone']
-                    if client_phone != '':
-                        client_phone = '7' + client_phone[1:].replace(' ', '').replace('-', '')
-                    else: self.logger.info('Не удалось получить номер телефона')
                     region = ''
                     if 'республика,' in ad_info["item"]["address"].lower() or 'область,' in ad_info["item"]["address"].lower():
                         addres_values = ad_info["item"]["address"].split(',')
@@ -269,19 +277,24 @@ class AvitoRealty():
                             if'республика,' in ad_info["item"]["address"].lower() or 'область,' in ad_info["item"]["address"].lower():
                                 region = v
                                 break
+                    
+                    ad_dict = {}
+                    for value in self.header.value.split(';'):
+                        ad_dict[value] = ''
 
-                    ad_dict = {
-                        'Дата публикации': f'{ad_info["contextItem"]["date"]}',
-                        'Заголовок': f'{ad_info["contextItem"]["title"]}',
-                        'Описание': f'{description}',
-                        'Цена': f'{ad_info["window.dataLayer"]["itemPrice"]}',
-                        'Регион': f'{region}',
-                        'Город': f'{ad_info["item"]["location"]["name"]}',
-                        'Адрес': f'{ad_info["item"]["address"]}',
-                        'url': f'{ad}',
-                        "Изображения": f'{images_str}',
-                        'Характеристики': f'{param_str}'
-                    }
+                    ad_dict['Дата публикации'] = (datetime.utcfromtimestamp(ad_info["contextItem"]["date_unix"]) + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') 
+                    ad_dict['Заголовок'] = ad_info["contextItem"]["title"]
+                    ad_dict['Описание'] = description
+                    ad_dict['Цена'] = ad_info["window.dataLayer"]["itemPrice"]
+                    ad_dict['Регион'] = region
+                    ad_dict['Город'] = ad_info["item"]["location"]["name"]
+                    ad_dict['Адрес'] = ad_info["item"]["address"]
+                    ad_dict['Url'] = ad
+                    ad_dict['Изображения'] = images_str
+
+                    for param in list(param_dict):
+                        ad_dict[param] = param_dict[param]
+
                     with self.lock:
                         self.logger.info('Полученные данные объявления {}'.format(ad_dict))
                         if self.parse_settings['result format'] == 'csv':
@@ -303,7 +316,7 @@ class AvitoRealty():
 
             except: self.logger.error('непредвиденная ошибка при сохранении данных\n{}'.format(traceback.format_exc()))
             finally:
-                time_pause = time_wait(self.delay)
+                time_pause = time_wait(self.delay.value)
                 self.logger.info(f'Ожидание: {time_pause} сек')
                 time.sleep(time_pause)
 
@@ -323,7 +336,7 @@ class AvitoRealty():
                 try:
                     url = f'{self.search_link}&p={page}'
 
-                    if self.parse_settings['method'] == 'selenium':
+                    if self.method.value == 'selenium':
                         newAds, is_lastPage = Get_ads.get_ads_browser(url=url, driver=self.driver)
 
                     for ad in newAds:
@@ -343,7 +356,7 @@ class AvitoRealty():
                         self.event.clear()
                     else:
                         self.event.set()
-                    time_pause = time_wait(self.delay)
+                    time_pause = time_wait(self.delay.value)
                     self.logger.info(f'Ожидание: {time_pause} сек')
                     time.sleep(time_pause)
                     if is_lastPage: break
@@ -357,7 +370,7 @@ class AvitoRealty():
                 try:
                     url = f'{self.search_link}&p={page}'
 
-                    if self.parse_settings['method'] == 'selenium':
+                    if self.method.value == 'selenium':
                         newAds, is_lastPage = Get_ads.get_ads_browser(url=url, driver=self.driver)
 
                     for ad in newAds:
@@ -381,7 +394,7 @@ class AvitoRealty():
                         self.event.clear()
                     else:
                         self.event.set()
-                    time_pause = time_wait(self.delay)
+                    time_pause = time_wait(self.delay.value)
                     self.logger.info(f'Ожидание: {time_pause} сек')
                     time.sleep(time_pause)
                     if is_lastPage: break
@@ -396,15 +409,11 @@ class AvitoRealty():
 
     def process(self):
         procs = []
-        # self.event.set()
         for i in range(self.multiprocess_settings['num process']):
-            if self.proxyes != []:
-                proxy = self.proxyes.pop(0)
-                self.proxyes.append(proxy)
             if i == 0:
                 proc = Process(target=work_process, args=(self, 'get ads',), name=f'Process-{i+1}')
             else:
-                proc = Process(target=work_process, args=(self, 'ad info',))
+                proc = Process(target=work_process, args=(self, 'ad info',), name=f'Process-{i+1}')
             procs.append(proc)
             proc.start()
 
