@@ -30,7 +30,7 @@ paths:
 # CRITICAL/critical
 log level: info
 
-num_error: !!int 5
+num_error: !!int 10
 
 # Количество страниц для сбора объявлении по каждой из ссылок
 # 0 - Собирать все страницы
@@ -41,13 +41,6 @@ num_pages: !!int 0
 # excel - сохранять данные в формате excel
 result format: !!str excel
 
-PostgreSQL data: 
-  host: !!str
-  port: !!str
-  user: !!str
-  password: !!str
-  database: !!str
-
 # Сохранять объявления которые проверялись
 save checked ads: !!bool True
 
@@ -55,12 +48,12 @@ save checked ads: !!bool True
 check new ad on processed: !!bool True
 
 # Перемешивать ссылки на объявления после процесса сбора
-shuffle ads: !!bool True
+shuffle ads: !!bool False
 
 # Задержка между загрузкой страниц в секундах
 delay: 
-  from: !!int 1
-  to: !!int 1
+  from: !!int 10
+  to: !!int 10
 
 # Использовать прокси при сборе
 using proxy: !!bool True
@@ -75,5 +68,5 @@ cycles:
   # get ads - собирать ссылки объявлений
   # ad info - собирать информацию из объявлений
   run_queue: 
-    - ad info
     - get ads
+    - ad info

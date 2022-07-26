@@ -39,8 +39,8 @@ def Backup(self, backup, paths: str):
         except: self.logger.info(f'Файл {paths[file].split("/")[-1]} по указанному пути {paths[file]} не обнаружен')
 
 def work_process(self, target):
-    self.logger.info('Начало выполнение процесса')
     self.logger = AvitoRealty.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
+    self.logger.info('Начало выполнение процесса')
     with self.lock:
         if self.method.value == 'selenium':
             self.driver = start_browser(self)
