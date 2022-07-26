@@ -24,7 +24,7 @@ def start_browser(self):
         self.driver.quit()
     except: pass
 
-    if self.proxyes != []:
+    if list(self.proxyes) != []:
         proxy = self.proxyes.pop(0)
         self.proxyes.append(proxy)
         print(proxy)
@@ -52,6 +52,7 @@ def work_process(self, target):
                 self.logger.info(f'Цикл сбора ссылок завершен. Ожидание {self.parse_settings["cycles"]["delay_between_cycles"]} сек.')
                 self.event.set()
                 time.sleep(self.parse_settings["cycles"]["delay_between_cycles"])
+
         elif self.numCycles.value > 0:
             self.logger.info('Начало выполнения {} кол-ва циклов'.format(self.numCycles.value))
             for i in range(int(self.numCycles.value)):
@@ -62,6 +63,9 @@ def work_process(self, target):
         
         elif self.numCycles.value < 0:
             self.logger.info('Значение cycles/nums в файле self.parse_settings не может быть отрицательным')
+
+        self.ads = read_write_data(self, path=self.paths['ads link'], action='read')
+        self.get_and_save_ads_info()
 
     elif target == 'ad info':
         self.logger.info('Ожидание ссылок для начала сбора данных')
@@ -316,6 +320,7 @@ class AvitoRealty():
 
                     ad_dict['Дата публикации'] = (datetime.utcfromtimestamp(ad_info["contextItem"]["date_unix"]) + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') 
                     ad_dict['Заголовок'] = ad_info["contextItem"]["title"]
+                    ad_dict['Тип недвижимости'] = ad_info["contextItem"]["category"]['name']
                     ad_dict['Описание'] = description
                     ad_dict['Цена'] = ad_info["window.dataLayer"]["itemPrice"]
                     ad_dict['Регион'] = region
