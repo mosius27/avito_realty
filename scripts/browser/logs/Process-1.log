@@ -1,9 +1,0 @@
-Process-1 | log time - 2022-07-25 13:40:57 | log level - DEBUG | [start_browser.py: line - 44 in function chrome] | Загрузка настроек запуска selenium браузера chrome
-Process-1 | log time - 2022-07-25 13:40:57 | log level - DEBUG | [start_browser.py: line - 50 in function chrome] | Добавление прокси 
-Process-1 | log time - 2022-07-25 13:40:57 | log level - DEBUG | [start_browser.py: line - 59 in function chrome] | Добавление аргументов запуска headless
-Process-1 | log time - 2022-07-25 13:40:57 | log level - DEBUG | [start_browser.py: line - 59 in function chrome] | Добавление аргументов запуска user agent
-Process-1 | log time - 2022-07-25 13:40:57 | log level - DEBUG | [start_browser.py: line - 59 in function chrome] | Добавление аргументов запуска window size
-Process-1 | log time - 2022-07-25 13:40:57 | log level - DEBUG | [start_browser.py: line - 59 in function chrome] | Добавление аргументов запуска disable blink features
-Process-1 | log time - 2022-07-25 13:40:57 | log level - DEBUG | [start_browser.py: line - 59 in function chrome] | Добавление аргументов запуска log level
-Process-1 | log time - 2022-07-25 13:40:57 | log level - DEBUG | [start_browser.py: line - 84 in function chrome] | Добавление к selenium драйверу эксперементальной опции prefs
-Process-1 | log time - 2022-07-25 13:40:57 | log level - DEBUG | [start_browser.py: line - 84 in function chrome] | Добавление к selenium драйверу эксперементальной опции excludeSwitches

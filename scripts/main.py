@@ -126,7 +126,7 @@ class AvitoRealty():
         manager = multiprocessing.Manager()
 
         self.proxyes = manager.list(read_write_data(self, path=self.paths['proxy'], action='read'))
-        self.proxyes = read_write_data(self, path=self.paths['proxy'], action='read')
+        # self.proxyes = read_write_data(self, path=self.paths['proxy'], action='read')
         self.generator_search_link = read_write_data(self, path=self.paths['create search link settings'], action='read')
         self.search_link = create_search_link.createSearchLink(self.generator_search_link)
         self.multiprocess_settings = read_write_data(self, path=self.paths['multiprocess settings'], action='read')
@@ -230,14 +230,35 @@ class AvitoRealty():
                 processed.append(ad)
                 read_write_data(self, path=self.paths['processed links'], var=processed, action='write')
 
-            try: ad_info = Check_ad.check_ad_browser(url=ad, driver=self.driver)
+            try:
+                ad_info, ip_is_blocked = Check_ad.check_ad_browser(url=ad, driver=self.driver)
+                if ip_is_blocked == True: 
+                    self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
+                    self.driver = start_browser(self)                    
+                    with self.lock:
+                        self.ads = read_write_data(self, path=self.paths['ads link'], action='read')
+                        self.ads.append(ad)
+                        read_write_data(self, path=self.paths['ads link'], var=self.ads, action='write')
+                        processed = read_write_data(self, path=self.paths['processed links'], action='read')
+                        processed.remove(ad)
+                        read_write_data(self, path=self.paths['processed links'], var=processed, action='write')
+                    continue
             except:
+                with self.lock:
+                    self.ads = read_write_data(self, path=self.paths['ads link'], action='read')
+                    self.ads.append(ad)
+                    read_write_data(self, path=self.paths['ads link'], var=self.ads, action='write')
+                    processed = read_write_data(self, path=self.paths['processed links'], action='read')
+                    processed.remove(ad)
+                    read_write_data(self, path=self.paths['processed links'], var=processed, action='write')
                 self.logger.error('Не удалось получить данные объявления {}'.format(traceback.format_exc()))
                 time_pause = time_wait(self.delay.value)
                 self.logger.info(f'Ожидание: {time_pause} сек')
                 time.sleep(time_pause)
                 continue
+                
             try:
+                ad_info = ad_info['dto']
                 if ad_info['item']['isActive'] == True:
                     images = ad_info['item']['imageUrls']
                     images_str = ''
@@ -332,12 +353,20 @@ class AvitoRealty():
                 self.event.set()
             processed = read_write_data(self, path=self.paths['processed links'], action='read')
             for page in range (1, self.parse_settings['num_pages'] + 1):
+                try: 
+                    if ip_is_blocked == True: page -= 1
+                except: pass
                 self.logger.info(f'Номер страницы: {page}')
                 try:
                     url = f'{self.search_link}&p={page}'
 
                     if self.method.value == 'selenium':
-                        newAds, is_lastPage = Get_ads.get_ads_browser(url=url, driver=self.driver)
+                        newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=url, driver=self.driver)
+
+                    if ip_is_blocked == True: 
+                        self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
+                        self.driver = start_browser(self)
+                        continue
 
                     for ad in newAds:
                         if ad not in ads:
@@ -362,8 +391,11 @@ class AvitoRealty():
                     if is_lastPage: break
 
         if self.parse_settings['num_pages'] == 0:
-            startPage = 1
+            page = 1
             while True:
+                try: 
+                    if ip_is_blocked == True: page -= 1
+                except: pass
                 ads = read_write_data(self, path=self.paths['ads link'], action='read')
                 processed = read_write_data(self, path=self.paths['processed links'], action='read')
                 self.logger.info(f'Номер страницы: {page}')
@@ -371,7 +403,12 @@ class AvitoRealty():
                     url = f'{self.search_link}&p={page}'
 
                     if self.method.value == 'selenium':
-                        newAds, is_lastPage = Get_ads.get_ads_browser(url=url, driver=self.driver)
+                        newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=url, driver=self.driver)
+                    
+                    if ip_is_blocked == True: 
+                        self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
+                        self.driver = start_browser(self)
+                        continue
 
                     for ad in newAds:
                         if self.parse_settings['check new ad on processed'] == True:
@@ -398,6 +435,7 @@ class AvitoRealty():
                     self.logger.info(f'Ожидание: {time_pause} сек')
                     time.sleep(time_pause)
                     if is_lastPage: break
+                    page += 1
         else:
             pass
 

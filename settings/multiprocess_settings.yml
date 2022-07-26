@@ -1,2 +1,2 @@
 use multiprocessing: !!bool True
-num process: !!int 2
+num process: !!int 5
