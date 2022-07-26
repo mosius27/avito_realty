@@ -21,7 +21,16 @@ paths:
   links for get data: !!str ./data/links/links.txt
   log folder: !!str ./data/logs/
 
+# Возможные значения уровня логирования:
+# NOTSET/notset
+# DEBUG/debug
+# INFO/info
+# WARNING/warning
+# ERROR/error
+# CRITICAL/critical
 log level: info
+
+num_error: !!int 5
 
 # Количество страниц для сбора объявлении по каждой из ссылок
 # 0 - Собирать все страницы

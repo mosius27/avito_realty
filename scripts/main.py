@@ -39,6 +39,7 @@ def Backup(self, backup, paths: str):
         except: self.logger.info(f'Файл {paths[file].split("/")[-1]} по указанному пути {paths[file]} не обнаружен')
 
 def work_process(self, target):
+    self.logger.info('Начало выполнение процесса')
     self.logger = AvitoRealty.initLogger(path=f"{os.path.abspath(self.paths['log folder'])}\\{multiprocessing.current_process().name}.log", logLvl=self.parse_settings['log level'])
     with self.lock:
         if self.method.value == 'selenium':
@@ -63,6 +64,7 @@ def work_process(self, target):
             self.logger.info('Значение cycles/nums в файле self.parse_settings не может быть отрицательным')
 
     elif target == 'ad info':
+        self.logger.info('Ожидание ссылок для начала сбора данных')
         self.event.wait()
         self.ads = read_write_data(self, path=self.paths['ads link'], action='read')
         self.get_and_save_ads_info()
@@ -124,13 +126,13 @@ class AvitoRealty():
         self.lock = RLock()
 
         manager = multiprocessing.Manager()
+        
+        self.num_error = 0
 
         self.proxyes = manager.list(read_write_data(self, path=self.paths['proxy'], action='read'))
-        # self.proxyes = read_write_data(self, path=self.paths['proxy'], action='read')
         self.generator_search_link = read_write_data(self, path=self.paths['create search link settings'], action='read')
         self.search_link = create_search_link.createSearchLink(self.generator_search_link)
         self.multiprocess_settings = read_write_data(self, path=self.paths['multiprocess settings'], action='read')
-        # self.search_links = read_write_data(self, path=self.parse_settings['paths']['links for get data'], action='read')
         self.header = manager.Value('', value=self.parse_settings['headers'])
         if self.parse_settings['result format'] == 'csv' and (self.parse_settings['clear prev result'] == True or f'{self.paths["result"].split("/")[-1]}.csv' not in os.listdir('./data/result/')):
             working_with_file.create_csv(f'{self.paths["result"]}.csv', self.header)
@@ -232,7 +234,9 @@ class AvitoRealty():
 
             try:
                 ad_info, ip_is_blocked = Check_ad.check_ad_browser(url=ad, driver=self.driver)
+                
                 if ip_is_blocked == True: 
+                    self.num_error = 0
                     self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
                     self.driver = start_browser(self)                    
                     with self.lock:
@@ -251,7 +255,14 @@ class AvitoRealty():
                     processed = read_write_data(self, path=self.paths['processed links'], action='read')
                     processed.remove(ad)
                     read_write_data(self, path=self.paths['processed links'], var=processed, action='write')
+
                 self.logger.error('Не удалось получить данные объявления {}'.format(traceback.format_exc()))
+
+                self.num_error += 1
+                if self.num_error >= self.parse_settings['num_error']:
+                    self.logger.error('Завершение выполнения процесса')    
+                    multiprocessing.current_process().close()
+
                 time_pause = time_wait(self.delay.value)
                 self.logger.info(f'Ожидание: {time_pause} сек')
                 time.sleep(time_pause)
@@ -335,7 +346,7 @@ class AvitoRealty():
                             data.append(ad_dict)
                             read_write_data(self, path=f'{self.paths["result"]}.json', var=data, action='write')
 
-            except: self.logger.error('непредвиденная ошибка при сохранении данных\n{}'.format(traceback.format_exc()))
+            except: self.logger.error('Ошибка при сохранении данных\n{}'.format(traceback.format_exc()))
             finally:
                 time_pause = time_wait(self.delay.value)
                 self.logger.info(f'Ожидание: {time_pause} сек')
@@ -361,9 +372,17 @@ class AvitoRealty():
                     url = f'{self.search_link}&p={page}'
 
                     if self.method.value == 'selenium':
-                        newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=url, driver=self.driver)
+                        try:
+                            newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=url, driver=self.driver)
+                        except:
+                            self.logger.error('Ошибка при сборе данных.').format(traceback.format_exc())
+                            self.num_error += 1
+                            if self.num_error >= self.parse_settings['num_error']:                    
+                                self.logger.error('Завершение выполнения процесса')    
+                                multiprocessing.current_process().terminate
 
                     if ip_is_blocked == True: 
+                        self.num_error = 0
                         self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
                         self.driver = start_browser(self)
                         continue
@@ -406,6 +425,7 @@ class AvitoRealty():
                         newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=url, driver=self.driver)
                     
                     if ip_is_blocked == True: 
+                        self.num_error = 0
                         self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
                         self.driver = start_browser(self)
                         continue
