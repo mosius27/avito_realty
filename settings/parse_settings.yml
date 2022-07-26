@@ -7,7 +7,7 @@ method: !!str selenium
 headers: !!str Дата публикации;Заголовок;Описание;Цена;Регион;Город;Адрес;Url;Изображения
 
 # Очищать результат работы предыдущего сбора
-clear prev result: True
+clear prev result: False
 
 # Расположение файлов и папок
 paths:
@@ -37,10 +37,16 @@ num_error: !!int 5
 num_pages: !!int 0
 
 # Формат сохраняемого файла
-# csv - сохранять данные в формате csv (Не поддерживает запись многострочного текста в одну ячейку)
 # json - сохранять данные в формате json
 # excel - сохранять данные в формате excel
 result format: !!str excel
+
+PostgreSQL data: 
+  host: !!str
+  port: !!str
+  user: !!str
+  password: !!str
+  database: !!str
 
 # Сохранять объявления которые проверялись
 save checked ads: !!bool True

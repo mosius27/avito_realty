@@ -29,7 +29,7 @@ def start_browser(self):
         self.proxyes.append(proxy)
         print(proxy)
         self.driver = Beginnig_browser.chrome(proxy=proxy, settings_path=self.paths['browser settings'])
-    else: self.driver = Beginnig_browser.chrome( settings_path=self.paths['browser settings'])
+    else: self.driver = Beginnig_browser.chrome(settings_path=self.paths['browser settings'])
     return self.driver
 
 def Backup(self, backup, paths: str):
@@ -217,7 +217,7 @@ class AvitoRealty():
         while self.ads:
             
             if multiprocessing.current_process().is_alive() == False:
-                multiprocessing.current_process().terminate
+                multiprocessing.current_process().close()
             with self.lock:
                 self.event.wait()
                 self.ads = read_write_data(self, path=self.paths['ads link'], action='read')
@@ -379,7 +379,7 @@ class AvitoRealty():
                             self.num_error += 1
                             if self.num_error >= self.parse_settings['num_error']:                    
                                 self.logger.error('Завершение выполнения процесса')    
-                                multiprocessing.current_process().terminate
+                                multiprocessing.current_process().close()
 
                     if ip_is_blocked == True: 
                         self.num_error = 0
