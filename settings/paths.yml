@@ -1,0 +1,8 @@
+result: !!str ./data/result/result
+ads_link: !!str ./data/links/ads.json
+processed_links: !!str ./data/links/processed.json
+browser_settings: !!str ./settings/browser_settings.yml
+create_search_link_settings: !!str ./settings/createSearchLink_settings.yml
+multiprocess_settings: !!str ./settings/multiprocess_settings.yml
+proxy: !!str ./data/proxy.txt
+log_folder: !!str ./data/logs/
