@@ -19,6 +19,7 @@ class ParseSettings(BaseModel):
     delay_to: dict=parse_settings['delay']['to']
     use_proxy: bool=parse_settings['use_proxy']
     work_mode: str=parse_settings['work_mode']
+    db_access: dict=parse_settings['db_access']
 
 class Paths(BaseModel):
     paths_settings = working_with_file.load_yaml('./settings/paths.yml')

@@ -92,10 +92,10 @@ class AvitoRealty():
         self.manager = Manager()
         self.proxyes = self.manager.list(read_write_data(self, path=datas.Paths().proxy, action='read'))
         if datas.ParseSettings().check_new_ad_on_processed == True:
-            self.processed = self.manager(read_write_data(self, path=datas.Paths().processed_links, action='read'))
+            self.processed = self.manager.list(read_write_data(self, path=datas.Paths().processed_links, action='read'))
         generator_links_settings = read_write_data(self, path=datas.Paths().create_search_link_settings, action='read')
-        search_link = create_search_link.createSearchLink(generator_links_settings, datas.ParseSettings().category, datas.ParseSettings().location)
-        search_links_list = self.checkNumAds()
+        self.search_link = create_search_link.createSearchLink(generator_links_settings, datas.ParseSettings().category, datas.ParseSettings().location)
+        self.search_links_list = self.checkNumAds()
 
     def start(self):
         if datas.ParseSettings().work_mode == 'get_ads':
@@ -116,7 +116,7 @@ class AvitoRealty():
         self.logger.info('Начало сбора ссылок на объявления')
         if datas.ParseSettings().deep_scan == True:
             page = self.manager.Value('', value=1)
-            for search_link in search_links_list:
+            for search_link in self.search_links_list:
                 while True:
                     try: 
                         if ip_is_blocked == True: page -= 1
@@ -158,6 +158,32 @@ class AvitoRealty():
                         if is_lastPage: break
                         page += 1
 
+        if datas.ParseSettings().deep_scan == True:
+            
+            for search_link in self.search_links_list:
+                page = self.manager.Value('', value=1)
+                try:
+                    url = f'{self.search_link}&p={page}&s=104'
+
+                    if self.method.value == 'selenium':
+                        newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=url, driver=self.driver)
+                    
+                    if ip_is_blocked == True: 
+                        self.num_error = 0
+                        self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
+                        self.driver = startBrowser(self)
+                        continue
+
+                    for ad in newAds:
+                        if self.parse_settings['check new ad on processed'] == True:
+                            if ad not in ads and ad not in processed:
+                                ads.append(ad)
+                        else:
+                            if ad not in ads:
+                                ads.append(ad)
+
+                    self.logger.info(f'Собрано ссылок: {len(ads)}')
+                except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
     def ads_data(self):
         from avito import Check_ad
 
@@ -291,11 +317,16 @@ class AvitoRealty():
                 time.sleep(time_pause)
 
     def checkNumAds(self):
-        pass
+        search_links_list = []
+        check_count_ad_link = f'{self.search_link}&countOnly=1'
+        driver = startBrowser(self)
+        
+        return search_links_list
 
     def startProcess(self):
         procs = []
 
 if __name__ == "__main__":
-    carprice = AvitoRealty()
-    carprice.get_ads()
+    # carprice = AvitoRealty()
+    # carprice.get_ads()
+    working_with_file.write_postgres_db(datas.ParseSettings().db_access, var={})

@@ -58,3 +58,11 @@ use_proxy: !!bool True
 # ads_data - собирать информацию из объявлений
 # all - Выполнить полный сбор данных. Очередность сбора 1 - сбор ссылок, 2 - сбор информации
 work_mode: !!str all
+
+db_access:
+  host: 127.0.0.1
+  port: 5432
+  user: postgres
+  password: kjr84!vfibyf_228
+  db_name: test
+  table_name: test

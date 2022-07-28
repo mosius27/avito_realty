@@ -5,6 +5,7 @@ import json
 import csv
 from openpyxl import Workbook, load_workbook
 import logging
+import psycopg2
 
 def initLogger(path: str, logLvl: str):
     import multiprocessing
@@ -76,3 +77,85 @@ def read_json(path: str):
 
 def write_json(path: str, var: list or dict):
     with open(path, 'w', encoding='utf8') as file: json.dump(var, file, indent='\t', ensure_ascii=False)
+
+def write_postgres_db(settings, var: dict or str):
+    try:
+        connection = psycopg2.connect(
+            host=settings['host'],
+            port=settings['port'],
+            user=settings['user'],
+            password=settings['password'],
+            database=settings['db_name']
+        )
+
+        connection.autocommit = True
+
+        # with connection.cursor() as cursor:
+        #     cursor.execute(
+        #         "SELECT version();"
+        #     )
+
+        #     print(f'Server version: {cursor.fetchone()}')
+
+        # with connection.cursor() as cursor:
+        #     cursor.execute(
+        #         "DROP TABLE IF EXISTS test"
+        #     )
+        # print("[INFO] Table drop successfully")
+
+        # with connection.cursor() as cursor:
+        #     cursor.execute(
+        #         """CREATE TABLE test(
+        #             id serial PRIMARY KEY,
+        #             date_published date,
+        #             title text,
+        #             type_realty text,
+        #             description text,
+        #             price integer,
+        #             region text,
+        #             city text,
+        #             address text,
+        #             url text,
+        #             urls_image text);
+        #         """
+        #     )
+            
+        #     print("[INFO] Table created successfully")
+
+        # with connection.cursor() as cursor:
+        #     cursor.execute(
+        #         """INSERT INTO test(
+        #             title,
+        #             type_realty,
+        #             description,
+        #             price,
+        #             region,
+        #             city,
+        #             address,
+        #             url,
+        #             urls_image) VALUES ('QWE', 'qwe', 'asd', 1, 'ASD', 'ewq', 'EWQ', 'w', 't');
+        #         """
+        #     )
+            
+        #     print("[INFO] Data was successfully inserted")
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """SELECT EXISTS (SELECT column_name
+                    FROM information_schema.columns 
+                    WHERE table_name='test' AND column_name='param');
+                    """
+            )
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "ALTER TABLE test ADD COLUMN param text"
+            )
+
+        
+    except Exception as _ex:
+        print("[INFO] Error while working with PostgreSQL", _ex)
+    finally:
+        if connection:
+            connection.close()
+            print("[INFO] PostgreSQL connection closed")
