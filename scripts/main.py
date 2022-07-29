@@ -96,6 +96,19 @@ class AvitoRealty():
         generator_links_settings = read_write_data(self, path=datas.Paths().create_search_link_settings, action='read')
         self.search_link = create_search_link.createSearchLink(generator_links_settings, datas.ParseSettings().category, datas.ParseSettings().location)
         self.search_links_list = self.checkNumAds()
+        data = {'Дата_публикации': 'Дата_публикации',
+            'Заголовок': 'Заголовок',
+            'Тип_недвижимости': 'Тип_недвижимости',
+            'Описание': 'Описание',
+            'Цена': 'Цена',
+            'Регион': 'Регион',
+            'Город': 'Город',
+            'Адрес': 'Адрес',
+            'Url': 'Url',
+            'Изображения': 'Изображения'
+            }
+        data = datas.Ad_Data(**data)
+        working_with_file.create_table_PostgresSQL(datas.ParseSettings().db_access, data)
 
     def start(self):
         if datas.ParseSettings().work_mode == 'get_ads':
@@ -242,12 +255,12 @@ class AvitoRealty():
                     params = ad_info['paramsDto']['items']
                     param_str = ''
                     with self.lock:
-                        header = self.header.value.split(';')
+                        
                         param_dict = {}
                         for param in params:
-                            if param["title"] not in header:
-                                self.header.value += f';{param["title"]}'
-                                working_with_file.write_line_excel(path=f'{self.paths["result"]}.xlsx', var=self.header.value, num_row=1)
+
+                            if working_with_file.check_exists_collumn_postgresSQL(datas.ParseSettings().db_access, param["title"]) == False:
+                                working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, param["title"])
                             try:
                                 if '*' in param['description']: param_dict[param["title"]] = ad_info["contextItem"]["raw_params"][str(params[param]["attributeId"]).replace("&nbsp;", " ")]
                                 else: param_dict[param["title"]] = param["description"].replace("&nbsp;", " ")
@@ -269,46 +282,23 @@ class AvitoRealty():
                                 region = v
                                 break
                     
-                    ad_dict = {}
-                    for value in self.header.value.split(';'):
-                        ad_dict[value] = ''
-
-                    data = {'date_published': (datetime.utcfromtimestamp(ad_info["contextItem"]["date_unix"]) + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S'),
-                        'title': ad_info["contextItem"]["title"],
-                        'type_realty': ad_info["contextItem"]["category"]['name'],
-                        'description': description,
-                        'price': ad_info["window.dataLayer"]["itemPrice"],
-                        'region': region,
-                        'city': ad_info["item"]["location"]["name"],
-                        'address': ad_info["item"]["address"],
-                        'url': ad,
-                        'urls_image': images_str,
-                        'params': param_dict
+                    data = {'Дата_публикации': (datetime.utcfromtimestamp(ad_info["contextItem"]["date_unix"]) + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S'),
+                        'Заголовок': ad_info["contextItem"]["title"],
+                        'Тип_недвижимости': ad_info["contextItem"]["category"]['name'],
+                        'Описание': description,
+                        'Цена': ad_info["window.dataLayer"]["itemPrice"],
+                        'Регион': region,
+                        'Город': ad_info["item"]["location"]["name"],
+                        'Адрес': ad_info["item"]["address"],
+                        'Url': ad,
+                        'Изображения': images_str,
                         }
 
                     ad_data = datas.Ad_Data(**data)
 
-                    for param in list(param_dict):
-                        ad_dict[param] = param_dict[param]
-
                     with self.lock:
-                        self.logger.info('Полученные данные объявления {}'.format(ad_dict))
-                        if self.parse_settings['result format'] == 'csv':
-                            self.logger.info('Сохранение данных в файл {}'.format(f'{self.paths["result"]}.csv'))
-                            read_write_data(self, path=f'{self.paths["result"]}.csv', var=ad_dict, header=self.parse_settings['headers'], action='write')
-
-                        if self.parse_settings['result format'] == 'excel':
-                            self.logger.info('Сохранение данных в файл {}'.format(f'{self.paths["result"]}.xlsx'))
-                            line = ''
-                            for key in list(ad_dict.keys()):
-                                line += f'{ad_dict[key]};'
-                            read_write_data(self, path=f'{self.paths["result"]}.xlsx', var=line, action='write')
-
-                        if self.parse_settings['result format'] == 'json':
-                            self.logger.info('Сохранение данных в файл {}'.format(f'{self.paths["result"]}.json'))
-                            data = read_write_data(self, path=f'{self.paths["result"]}.json', action='read')
-                            data.append(ad_dict)
-                            read_write_data(self, path=f'{self.paths["result"]}.json', var=data, action='write')
+                        self.logger.info('Полученные данные объявления {}'.format(data))
+                        working_with_file.insert_table_PostgresSQL(datas.ParseSettings().db_access, ad_data, param_dict)
 
             except: self.logger.error('Ошибка при сохранении данных\n{}'.format(traceback.format_exc()))
             finally:
@@ -329,4 +319,21 @@ class AvitoRealty():
 if __name__ == "__main__":
     # carprice = AvitoRealty()
     # carprice.get_ads()
-    working_with_file.write_postgres_db(datas.ParseSettings().db_access, var={})
+    data = {'Дата_публикации': '2022-07-29 13:57:53',
+            'Заголовок': 'Заголовок',
+            'Тип_недвижимости': 'Тип_недвижимости',
+            'Описание': 'Описание',
+            'Цена': 1,
+            'Регион': 'Регион',
+            'Город': 'Город',
+            'Адрес': 'Адрес',
+            'Url': 'Url',
+            'Изображения': 'Изображения'
+            }
+    data = datas.Ad_Data(**data)
+    params = {'qwe': 'qwe', 'adszxc': 'adszxc'}
+    # working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, 'qwe')
+    # working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, 'adszxc')
+
+    working_with_file.insert_table_PostgresSQL(datas.ParseSettings().db_access, dict(data), params)
+    ...

@@ -78,7 +78,7 @@ def read_json(path: str):
 def write_json(path: str, var: list or dict):
     with open(path, 'w', encoding='utf8') as file: json.dump(var, file, indent='\t', ensure_ascii=False)
 
-def write_postgres_db(settings, var: dict or str):
+def check_exists_collumn_postgresSQL(settings, var: str):
     try:
         connection = psycopg2.connect(
             host=settings['host'],
@@ -90,69 +90,111 @@ def write_postgres_db(settings, var: dict or str):
 
         connection.autocommit = True
 
-        # with connection.cursor() as cursor:
-        #     cursor.execute(
-        #         "SELECT version();"
-        #     )
-
-        #     print(f'Server version: {cursor.fetchone()}')
-
-        # with connection.cursor() as cursor:
-        #     cursor.execute(
-        #         "DROP TABLE IF EXISTS test"
-        #     )
-        # print("[INFO] Table drop successfully")
-
-        # with connection.cursor() as cursor:
-        #     cursor.execute(
-        #         """CREATE TABLE test(
-        #             id serial PRIMARY KEY,
-        #             date_published date,
-        #             title text,
-        #             type_realty text,
-        #             description text,
-        #             price integer,
-        #             region text,
-        #             city text,
-        #             address text,
-        #             url text,
-        #             urls_image text);
-        #         """
-        #     )
-            
-        #     print("[INFO] Table created successfully")
-
-        # with connection.cursor() as cursor:
-        #     cursor.execute(
-        #         """INSERT INTO test(
-        #             title,
-        #             type_realty,
-        #             description,
-        #             price,
-        #             region,
-        #             city,
-        #             address,
-        #             url,
-        #             urls_image) VALUES ('QWE', 'qwe', 'asd', 1, 'ASD', 'ewq', 'EWQ', 'w', 't');
-        #         """
-        #     )
-            
-        #     print("[INFO] Data was successfully inserted")
-
         with connection.cursor() as cursor:
             cursor.execute(
-                """SELECT EXISTS (SELECT column_name
+                f"""SELECT EXISTS (SELECT column_name
                     FROM information_schema.columns 
-                    WHERE table_name='test' AND column_name='param');
+                    WHERE table_name='{settings['table_name']}' AND column_name='{var}');
                     """
             )
+            return cursor.fetchone()[0]
+    except Exception as _ex:
+        print("[INFO] Error while working with PostgreSQL", _ex)
+    finally:
+        if connection:
+            connection.close()
+            print("[INFO] PostgreSQL connection closed")
+
+def create_table_PostgresSQL(settings, var: dict):
+    try:
+        connection = psycopg2.connect(
+            host=settings['host'],
+            port=settings['port'],
+            user=settings['user'],
+            password=settings['password'],
+            database=settings['db_name']
+        )
+
+        connection.autocommit = True
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""CREATE tABLE IF NOT EXISTS test(
+                    id serial PRIMARY KEY,
+                    {var.date_published} timestamp,
+                    {var.title} text,
+                    {var.type_realty} text,
+                    {var.description} text,
+                    {var.price} integer,
+                    {var.region} text,
+                    {var.city} text,
+                    {var.address} text,
+                    {var.url} text,
+                    {var.urls_image} text);
+                """
+            )
+            
+            print("[INFO] Table created successfully")
+    except Exception as _ex:
+        print("[INFO] Error while working with PostgreSQL", _ex)
+    finally:
+        if connection:
+            connection.close()
+            print("[INFO] PostgreSQL connection closed")
+
+def insert_table_PostgresSQL(settings, var: dict, params: dict):
+    try:
+        connection = psycopg2.connect(
+            host=settings['host'],
+            port=settings['port'],
+            user=settings['user'],
+            password=settings['password'],
+            database=settings['db_name']
+        )
+
+        var = dict(var)
+        connection.autocommit = True
+
+        for param in params:
+            var[param] = params[param]
+
+        keys = values = ''
+        for v in var:
+            keys += f'{v},'
+            values += f"'{var[v]}',"
+
+        if keys[-1] == ',':
+            keys = keys[:-1]
+        if values[-1] == ',':
+            values = values[:-1]
+
+        with connection.cursor() as cursor:
+            cursor.execute(f"INSERT INTO {settings['table_name']} ({keys}) VALUES({values});")
+            
+            print("[INFO] Data was successfully inserted")
+
+    except Exception as _ex:
+        print("[INFO] Error while working with PostgreSQL", _ex)
+    finally:
+        if connection:
+            connection.close()
+            print("[INFO] PostgreSQL connection closed")
+
+def add_column_PostgresSQL(settings, var: str):
+    try:
+        connection = psycopg2.connect(
+            host=settings['host'],
+            port=settings['port'],
+            user=settings['user'],
+            password=settings['password'],
+            database=settings['db_name']
+        )
+        
+        connection.autocommit = True
 
         with connection.cursor() as cursor:
             cursor.execute(
-                "ALTER TABLE test ADD COLUMN param text"
-            )
+                f"ALTER TABLE {settings['table_name']} ADD COLUMN {var} text")
 
-        
     except Exception as _ex:
         print("[INFO] Error while working with PostgreSQL", _ex)
     finally:
