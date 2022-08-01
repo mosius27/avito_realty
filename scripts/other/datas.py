@@ -26,6 +26,8 @@ class Paths(BaseModel):
     processed_links: str=paths_settings['processed_links']
     browser_settings: str=paths_settings['browser_settings']
     create_search_link_settings: str=paths_settings['create_search_link_settings']
+    locations: str=paths_settings['locations']
+    categories: str=paths_settings['categories']
     multiprocess_settings: str=paths_settings['multiprocess_settings']
     proxy: str=paths_settings['proxy']
     log_folder: str=paths_settings['log_folder']

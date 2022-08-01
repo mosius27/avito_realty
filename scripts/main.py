@@ -94,7 +94,9 @@ class AvitoRealty():
         if datas.ParseSettings().check_new_ad_on_processed == True:
             self.processed = self.manager.list(read_write_data(self, path=datas.Paths().processed_links, action='read'))
         generator_links_settings = read_write_data(self, path=datas.Paths().create_search_link_settings, action='read')
-        self.search_link = create_search_link.createSearchLink(generator_links_settings, datas.ParseSettings().category, datas.ParseSettings().location)
+        category = read_write_data(self, path=datas.Paths().categories, action='read')
+        location = read_write_data(self, path=datas.Paths().locations, action='read')
+        self.search_link = create_search_link.createSearchLink(generator_links_settings, category, location)
         self.search_links_list = self.checkNumAds()
         data = {'Дата_публикации': 'Дата_публикации',
             'Заголовок': 'Заголовок',

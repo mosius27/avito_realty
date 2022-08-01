@@ -53,265 +53,496 @@
 Локация:
   1: 
     name: Республика Адыгея
-    value: 
+    value: 645530
   2: 
     name: Майкоп
-    value: 
+    value: 645660
   3: 
-    name: 	Республика Башкортостан
-    value: 
+    name: Республика Башкортостан
+    value: 645790
   4:
     name: Уфа
-    value: 
+    value: 646600
   5:
     name: Республика Бурятия
-    value: 
+    value: 623845
   6:
     name: Улан-Удэ
-    value: 
+    value: 653271
   7:
     name: Республика Алтай
-    value: 
+    value: 662811
   8:
     name: Горно-Алтайск
-    value:
+    value: 662812
   9:
     name: Республика Дагестан
-    value:
+    value: 646710
   10:
     name: Махачкала
-    value:
+    value: 647420
   11:
     name: Республика Ингушетия
-    value:
+    value: 628455
   12:
     name: Магас
-    value:
+    value: 653323
   13:
-    name: Кабардино-Балкарская Республика
-    value:
+    name: Республика Кабардино-Балкария
+    value: 629430
   14:
     name: Нальчик
-    value:
+    value: 629770
   15:
     name: Республика Калмыкия
-    value:
+    value: 629995
   16:
     name: Элиста
-    value:
+    value: 653341
   17:
-    name: 
-    value:
+    name: Республика Карачаево-Черкесия
+    value: 630750
   18:
-    name: 
-    value:
+    name: Черкесск
+    value: 631060
   19:
-    name: 
-    value:
+    name: Республика Карелия
+    value: 648070
   20:
-    name: 
-    value:
+    name: Петрозаводск
+    value: 648220
   21:
-    name: 
-    value:
+    name: Республика Коми
+    value: 648340
   22:
-    name: 
-    value:
+    name: Сыктывкар
+    value: 648630
   23:
-    name: 
-    value:
+    name: Республика Марий Эл
+    value: 648730
   24:
-    name: 
-    value:
+    name: Йошкар-Ола
+    value: 648760
   25:
-    name: 
-    value:
+    name: Республика Мордовия
+    value: 648960
   26:
-    name: 
-    value:
+    name: Саранск
+    value: 649210
   27:
-    name: 
-    value:
+    name: Республика Якутия
+    value: 649330
   28:
-    name: 
-    value:
+    name: Якутск
+    value: 649810
   29:
-    name: 
-    value:
+    name: Республика Северная Осетия-Алания
+    value: 649820
   30:
-    name: 
-    value:
+    name: Владикавказ
+    value: 649870
   31:
-    name: 
-    value:
+    name: Республика Татарстан
+    value: 650130
   32:
-    name: 
-    value:
+    name: Казань
+    value: 650400
   33:
-    name: 
-    value:
+    name: Республика Тыва
+    value: 650690
   34:
-    name: 
-    value:
+    name: Кызыл
+    value: 650740
   35:
-    name: 
-    value:
+    name: Удмуртская Республика
+    value: 659200
   36:
-    name: 
-    value:
+    name: Ижевск
+    value: 659300
   37:
-    name: 
-    value:
+    name: Республика Хакасия
+    value: 650890
   38:
-    name: 
-    value:
+    name: Абакан
+    value: 650910
   39:
-    name: 
-    value:
+    name: Республика Чеченская
+    value: 660711
   40:
-    name: 
-    value:
+    name: Грозный
+    value: 653391
   41:
-    name: 
-    value:
+    name: Республика Чувашия
+    value: 662000
   42:
-    name: 
-    value:
+    name: Чебоксары
+    value: 662210
   43:
-    name: 
-    value:
+    name: Алтайский край
+    value: 621590
   44:
-    name: 
-    value:
+    name: Барнаул
+    value: 621630
   45:
-    name: 
-    value:
+    name: Краснодарский край
+    value: 632660
   46:
-    name: 
-    value:
+    name: Краснодар
+    value: 633540
   47:
-    name: 
-    value:
+    name: Красноярский край
+    value: 634930
   48:
-    name: 
-    value:
+    name: Красноярск
+    value: 635320
   49:
-    name: 
-    value:
+    name: Приморский край
+    value: 644490
   50:
-    name: 
-    value:
+    name: Владивосток
+    value: 644560
   51:
-    name: 
-    value:
+    name: Ставропольский край
+    value: 655190
   52:
-    name: 
-    value:
+    name: Ставрополь
+    value: 656350
   53:
-    name: 
-    value:
+    name: Хабаровский край
+    value: 659930
   54:
-    name: 
-    value:
+    name: Хабаровск
+    value: 660250
   55:
-    name: 
-    value:
+    name: Амурская область
+    value: 622470
   56:
-    name: 
-    value:
+    name: Благовещенск
+    value: 622500
   57:
-    name: 
-    value:
+    name: Архангельская область
+    value: 622650
   58:
-    name: 
-    value:
+    name: Архангельск
+    value: 622660
   59:
-    name: 
-    value:
+    name: Астраханская область
+    value: 623110
   60:
-    name: 
-    value:
+    name: Астрахань
+    value: 623130
   61:
-    name: 
-    value:
+    name: Белгородская область
+    value: 623410
   62:
-    name: 
-    value:
+    name: Белгород
+    value: 623430
   63:
-    name: 
-    value:
+    name: Брянская область
+    value: 623840
   64:
-    name: 
-    value:
+    name: Брянск
+    value: 623880
   65:
-    name: 
-    value:
+    name: Владимирская область
+    value: 624300
   66:
-    name: 
-    value:
+    name: Владимир
+    value: 624360
   67:
-    name: 
-    value:
+    name: Волгоградская область
+    value: 624770
   68:
-    name: 
-    value:
+    name: Волгоград
+    value: 624840
   69:
-    name: 
-    value:
+    name: Вологодская область
+    value: 625330
   70:
-    name: 
-    value:
+    name: Вологда
+    value: 625330
   71:
-    name: 
-    value:
+    name: Воронежская область
+    value: 625670
   72:
-    name: 
-    value:
+    name: Воронеж
+    value: 625810
   73:
-    name: 
-    value:
+    name: Ивановская область
+    value: 628450
   74:
-    name: 
-    value:
+    name: Иваново
+    value: 628500
   75:
-    name: 
-    value:
+    name: Иркутская область
+    value: 628780
   76:
-    name: 
-    value:
+    name: Иркутск
+    value: 628970
   77:
-    name: 
-    value:
+    name: Калининградская область
+    value: 629990
   78:
-    name: 
-    value:
+    name: Калининград
+    value: 630090
   79:
-    name: 
-    value:
+    name: Калужская область
+    value: 630270
   80:
-    name: 
-    value:
+    name: Калуга
+    value: 630410
   81:
-    name: 
-    value:
+    name: Камчатский край
+    value: 630660
   82:
-    name: 
-    value:
+    name: Петропавловск-Камчатский
+    value: 630730
   83:
-    name: 
-    value:
+    name: Кемеровская область
+    value: 631080
   84:
-    name: 
-    value:
+    name: Кемерово
+    value: 631270
   85:
-    name: 
-    value:
+    name: Кировская область
+    value: 631730
   86:
-    name: 
-    value:
+    name: Киров
+    value: 631870
   84:
-    name: 
-    value:
+    name: Костромская область
+    value: 632390
   88:
-    name: 
-    value:
+    name: Кострома
+    value: 632490
+  89: 
+    name: Курганская область
+    value: 635730
+  90: 
+    name: Курган
+    value: 635860
+  91: 
+    name: Курская область
+    value: 636030
+  92:
+    name: Курск
+    value: 636160
+  93:
+    name: Ленинградская область
+    value: 636370
+  94:
+    name: Санкт-Петербург
+    value: 636370
+  95:
+    name: Липецкая область
+    value: 637260
+  96:
+    name: Липецк
+    value: 637440
+  97:
+    name: Магаданская область
+    value: 637530
+  98:
+    name: Магадан
+    value: 637540
+  99:
+    name: Московская область
+    value: 637680
+  100:
+    name: Москва
+    value: 637640
+  101:
+    name: Мурманская область
+    value: 640000
+  102:
+    name: Мурманск
+    value: 640160
+  103:
+    name: Нижегородская область
+    value: 640310
+  104:
+    name: Нижний Новгород
+    value: 640860
+  105:
+    name: Новгородская область
+    value: 641240
+  106
+    name: Великий Новгород
+    value: 641270
+  107:
+    name: Новосибирская область
+    value: 641470
+  108:
+    name: Новосибирск
+    value: 641780
+  109:
+    name: Омская область
+    value: 642020
+  110:
+    name: Омск
+    value: 642320
+  111:
+    name: Оренбургская область
+    value: 642480
+  112:
+    name: Оренбург
+    value: 642790
+  113:
+    name: Орловская область
+    value: 643030
+  114:
+    name: Орел
+    value: 643190
+  115:
+    name: Пензенская область
+    value: 643250
+  116:
+    name: Пенза
+    value: 643560
+  117:
+    name: Пермский край
+    value: 643700
+  118:
+    name: Пермь
+    value: 644200
+  119:
+    name: Псковская область
+    value: 645260
+  120:
+    name: Псков
+    value: 645450
+  121:
+    name: Ростовская область
+    value: 651110
+  122:
+    name: Ростов-на-Дону
+    value: 652000
+  123:
+    name: Рязанская область
+    value: 652220
+  124:
+    name: Рязань
+    value: 652430
+  125:
+    name: Самарская область
+    value: 652560
+  126:
+    name: Самара
+    value: 653040
+  127:
+    name: Саратовская область
+    value: 653420
+  128:
+    name: Саратов
+    value: 653241
+  129:
+    name: Сахалинская область
+    value: 653430
+  130:
+    name: Южно-Сахалинск
+    value: 653690
+  131:
+    name: Свердловская область
+    value: 653700
+  132:
+    name: Екатеринбург
+    value: 654070
+  133:
+    name: Смоленская область
+    value: 654860
+  134:
+    name: Смоленск
+    value: 655100
+  135:
+    name: Тамбовская область
+    value: 656520
+  136:
+    name: Тамбов
+    value: 656830
+  137:
+    name: Тверская область
+    value: 656890
+  138:
+    name: Тверь
+    value: 656901
+  139:
+    name: Томская область
+    value: 657310
+  140:
+    name: Томск
+    value: 657600
+  141:
+    name: Тульская область
+    value: 657610
+  142:
+    name: Тула
+    value: 658080
+  143:
+    name: Тюменская область
+    value: 658170
+  144:
+    name: Тюмень
+    value: 659020
+  145:
+    name: Ульяновская область
+    value: 659540
+  146:
+    name: Ульяновск
+    value: 659880
+  147:
+    name: Челябинская область
+    value: 660710
+  148:
+    name: Челябинск
+    value: 661420
+  149:
+    name: Забайкальский край
+    value: 661460
+  150:
+    name: Чита
+    value: 661950
+  151:
+    name: Ярославская область
+    value: 662530
+  152:
+    name: Ярославль
+    value: 662810
+  153:
+    name: Ненецкий автономный округ
+    value: 640001
+  154:
+    name: Нарьян-Мар
+    value: 653371
+  155:
+    name: Ханты-Мансийский автономный округ - Югра
+    value: 660300
+  156:
+    name: Ханты-Мансийск
+    value: 660680
+  157:
+    name: Чукотский автономный округ
+    value: 662280
+  158:
+    name: Анадырь
+    value: 662290
+  159:
+    name: Ямало-Ненецкий автономный округ
+    value: 662330
+  160:
+    name: Салехард
+    value: 662460
+  161:
+    name: Республика Крым
+    value: 621550
+  162:
+    name: Симферополь
+    value: 621565
+  163:
+    name: Севастополь
+    value: 621585
+  164:
+    name: Санкт-Петербург и ЛО
+    value: 107621
+  165:
+    name: Москва и МО
+    value: 107620
