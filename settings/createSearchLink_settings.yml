@@ -53,496 +53,496 @@
 Локация:
   1: 
     name: Республика Адыгея
-    value: 645530
+    value: locationId=645530
   2: 
     name: Майкоп
-    value: 645660
+    value: locationId=645660
   3: 
     name: Республика Башкортостан
-    value: 645790
+    value: locationId=645790
   4:
     name: Уфа
-    value: 646600
+    value: locationId=646600
   5:
     name: Республика Бурятия
-    value: 623845
+    value: locationId=623845
   6:
     name: Улан-Удэ
-    value: 653271
+    value: locationId=653271
   7:
     name: Республика Алтай
-    value: 662811
+    value: locationId=662811
   8:
     name: Горно-Алтайск
-    value: 662812
+    value: locationId=662812
   9:
     name: Республика Дагестан
-    value: 646710
+    value: locationId=646710
   10:
     name: Махачкала
-    value: 647420
+    value: locationId=647420
   11:
     name: Республика Ингушетия
-    value: 628455
+    value: locationId=628455
   12:
     name: Магас
-    value: 653323
+    value: locationId=653323
   13:
     name: Республика Кабардино-Балкария
-    value: 629430
+    value: locationId=629430
   14:
     name: Нальчик
-    value: 629770
+    value: locationId=629770
   15:
     name: Республика Калмыкия
-    value: 629995
+    value: locationId=629995
   16:
     name: Элиста
-    value: 653341
+    value: locationId=653341
   17:
     name: Республика Карачаево-Черкесия
-    value: 630750
+    value: locationId=630750
   18:
     name: Черкесск
-    value: 631060
+    value: locationId=631060
   19:
     name: Республика Карелия
-    value: 648070
+    value: locationId=648070
   20:
     name: Петрозаводск
-    value: 648220
+    value: locationId=648220
   21:
     name: Республика Коми
-    value: 648340
+    value: locationId=648340
   22:
     name: Сыктывкар
-    value: 648630
+    value: locationId=648630
   23:
     name: Республика Марий Эл
-    value: 648730
+    value: locationId=648730
   24:
     name: Йошкар-Ола
-    value: 648760
+    value: locationId=648760
   25:
     name: Республика Мордовия
-    value: 648960
+    value: locationId=648960
   26:
     name: Саранск
-    value: 649210
+    value: locationId=649210
   27:
     name: Республика Якутия
-    value: 649330
+    value: locationId=649330
   28:
     name: Якутск
-    value: 649810
+    value: locationId=649810
   29:
     name: Республика Северная Осетия-Алания
-    value: 649820
+    value: locationId=649820
   30:
     name: Владикавказ
-    value: 649870
+    value: locationId=649870
   31:
     name: Республика Татарстан
-    value: 650130
+    value: locationId=650130
   32:
     name: Казань
-    value: 650400
+    value: locationId=650400
   33:
     name: Республика Тыва
-    value: 650690
+    value: locationId=650690
   34:
     name: Кызыл
-    value: 650740
+    value: locationId=650740
   35:
     name: Удмуртская Республика
-    value: 659200
+    value: locationId=659200
   36:
     name: Ижевск
-    value: 659300
+    value: locationId=659300
   37:
     name: Республика Хакасия
-    value: 650890
+    value: locationId=650890
   38:
     name: Абакан
-    value: 650910
+    value: locationId=650910
   39:
     name: Республика Чеченская
-    value: 660711
+    value: locationId=660711
   40:
     name: Грозный
-    value: 653391
+    value: locationId=653391
   41:
     name: Республика Чувашия
-    value: 662000
+    value: locationId=662000
   42:
     name: Чебоксары
-    value: 662210
+    value: locationId=662210
   43:
     name: Алтайский край
-    value: 621590
+    value: locationId=621590
   44:
     name: Барнаул
-    value: 621630
+    value: locationId=621630
   45:
     name: Краснодарский край
-    value: 632660
+    value: locationId=632660
   46:
     name: Краснодар
-    value: 633540
+    value: locationId=633540
   47:
     name: Красноярский край
-    value: 634930
+    value: locationId=634930
   48:
     name: Красноярск
-    value: 635320
+    value: locationId=635320
   49:
     name: Приморский край
-    value: 644490
+    value: locationId=644490
   50:
     name: Владивосток
-    value: 644560
+    value: locationId=644560
   51:
     name: Ставропольский край
-    value: 655190
+    value: locationId=655190
   52:
     name: Ставрополь
-    value: 656350
+    value: locationId=656350
   53:
     name: Хабаровский край
-    value: 659930
+    value: locationId=659930
   54:
     name: Хабаровск
-    value: 660250
+    value: locationId=660250
   55:
     name: Амурская область
-    value: 622470
+    value: locationId=622470
   56:
     name: Благовещенск
-    value: 622500
+    value: locationId=622500
   57:
     name: Архангельская область
-    value: 622650
+    value: locationId=622650
   58:
     name: Архангельск
-    value: 622660
+    value: locationId=622660
   59:
     name: Астраханская область
-    value: 623110
+    value: locationId=623110
   60:
     name: Астрахань
-    value: 623130
+    value: locationId=623130
   61:
     name: Белгородская область
-    value: 623410
+    value: locationId=623410
   62:
     name: Белгород
-    value: 623430
+    value: locationId=623430
   63:
     name: Брянская область
-    value: 623840
+    value: locationId=623840
   64:
     name: Брянск
-    value: 623880
+    value: locationId=623880
   65:
     name: Владимирская область
-    value: 624300
+    value: locationId=624300
   66:
     name: Владимир
-    value: 624360
+    value: locationId=624360
   67:
     name: Волгоградская область
-    value: 624770
+    value: locationId=624770
   68:
     name: Волгоград
-    value: 624840
+    value: locationId=624840
   69:
     name: Вологодская область
-    value: 625330
+    value: locationId=625330
   70:
     name: Вологда
-    value: 625330
+    value: locationId=625330
   71:
     name: Воронежская область
-    value: 625670
+    value: locationId=625670
   72:
     name: Воронеж
-    value: 625810
+    value: locationId=625810
   73:
     name: Ивановская область
-    value: 628450
+    value: locationId=628450
   74:
     name: Иваново
-    value: 628500
+    value: locationId=628500
   75:
     name: Иркутская область
-    value: 628780
+    value: locationId=628780
   76:
     name: Иркутск
-    value: 628970
+    value: locationId=628970
   77:
     name: Калининградская область
-    value: 629990
+    value: locationId=629990
   78:
     name: Калининград
-    value: 630090
+    value: locationId=630090
   79:
     name: Калужская область
-    value: 630270
+    value: locationId=630270
   80:
     name: Калуга
-    value: 630410
+    value: locationId=630410
   81:
     name: Камчатский край
-    value: 630660
+    value: locationId=630660
   82:
     name: Петропавловск-Камчатский
-    value: 630730
+    value: locationId=630730
   83:
     name: Кемеровская область
-    value: 631080
+    value: locationId=631080
   84:
     name: Кемерово
-    value: 631270
+    value: locationId=631270
   85:
     name: Кировская область
-    value: 631730
+    value: locationId=631730
   86:
     name: Киров
-    value: 631870
+    value: locationId=631870
   84:
     name: Костромская область
-    value: 632390
+    value: locationId=632390
   88:
     name: Кострома
-    value: 632490
+    value: locationId=632490
   89: 
     name: Курганская область
-    value: 635730
+    value: locationId=635730
   90: 
     name: Курган
-    value: 635860
+    value: locationId=635860
   91: 
     name: Курская область
-    value: 636030
+    value: locationId=636030
   92:
     name: Курск
-    value: 636160
+    value: locationId=636160
   93:
     name: Ленинградская область
-    value: 636370
+    value: locationId=636370
   94:
     name: Санкт-Петербург
-    value: 636370
+    value: locationId=636370
   95:
     name: Липецкая область
-    value: 637260
+    value: locationId=637260
   96:
     name: Липецк
-    value: 637440
+    value: locationId=637440
   97:
     name: Магаданская область
-    value: 637530
+    value: locationId=637530
   98:
     name: Магадан
-    value: 637540
+    value: locationId=637540
   99:
     name: Московская область
-    value: 637680
+    value: locationId=637680
   100:
     name: Москва
-    value: 637640
+    value: locationId=637640
   101:
     name: Мурманская область
-    value: 640000
+    value: locationId=640000
   102:
     name: Мурманск
-    value: 640160
+    value: locationId=640160
   103:
     name: Нижегородская область
-    value: 640310
+    value: locationId=640310
   104:
     name: Нижний Новгород
-    value: 640860
+    value: locationId=640860
   105:
     name: Новгородская область
-    value: 641240
-  106
+    value: locationId=641240
+  106:
     name: Великий Новгород
-    value: 641270
+    value: locationId=641270
   107:
     name: Новосибирская область
-    value: 641470
+    value: locationId=641470
   108:
     name: Новосибирск
-    value: 641780
+    value: locationId=641780
   109:
     name: Омская область
-    value: 642020
+    value: locationId=642020
   110:
     name: Омск
-    value: 642320
+    value: locationId=642320
   111:
     name: Оренбургская область
-    value: 642480
+    value: locationId=642480
   112:
     name: Оренбург
-    value: 642790
+    value: locationId=642790
   113:
     name: Орловская область
-    value: 643030
+    value: locationId=643030
   114:
     name: Орел
-    value: 643190
+    value: locationId=643190
   115:
     name: Пензенская область
-    value: 643250
+    value: locationId=643250
   116:
     name: Пенза
-    value: 643560
+    value: locationId=643560
   117:
     name: Пермский край
-    value: 643700
+    value: locationId=643700
   118:
     name: Пермь
-    value: 644200
+    value: locationId=644200
   119:
     name: Псковская область
-    value: 645260
+    value: locationId=645260
   120:
     name: Псков
-    value: 645450
+    value: locationId=645450
   121:
     name: Ростовская область
-    value: 651110
+    value: locationId=651110
   122:
     name: Ростов-на-Дону
-    value: 652000
+    value: locationId=652000
   123:
     name: Рязанская область
-    value: 652220
+    value: locationId=652220
   124:
     name: Рязань
-    value: 652430
+    value: locationId=652430
   125:
     name: Самарская область
-    value: 652560
+    value: locationId=652560
   126:
     name: Самара
-    value: 653040
+    value: locationId=653040
   127:
     name: Саратовская область
-    value: 653420
+    value: locationId=653420
   128:
     name: Саратов
-    value: 653241
+    value: locationId=653241
   129:
     name: Сахалинская область
-    value: 653430
+    value: locationId=653430
   130:
     name: Южно-Сахалинск
-    value: 653690
+    value: locationId=653690
   131:
     name: Свердловская область
-    value: 653700
+    value: locationId=653700
   132:
     name: Екатеринбург
-    value: 654070
+    value: locationId=654070
   133:
     name: Смоленская область
-    value: 654860
+    value: locationId=654860
   134:
     name: Смоленск
-    value: 655100
+    value: locationId=655100
   135:
     name: Тамбовская область
-    value: 656520
+    value: locationId=656520
   136:
     name: Тамбов
-    value: 656830
+    value: locationId=656830
   137:
     name: Тверская область
-    value: 656890
+    value: locationId=656890
   138:
     name: Тверь
-    value: 656901
+    value: locationId=656901
   139:
     name: Томская область
-    value: 657310
+    value: locationId=657310
   140:
     name: Томск
-    value: 657600
+    value: locationId=657600
   141:
     name: Тульская область
-    value: 657610
+    value: locationId=657610
   142:
     name: Тула
-    value: 658080
+    value: locationId=658080
   143:
     name: Тюменская область
-    value: 658170
+    value: locationId=658170
   144:
     name: Тюмень
-    value: 659020
+    value: locationId=659020
   145:
     name: Ульяновская область
-    value: 659540
+    value: locationId=659540
   146:
     name: Ульяновск
-    value: 659880
+    value: locationId=659880
   147:
     name: Челябинская область
-    value: 660710
+    value: locationId=660710
   148:
     name: Челябинск
-    value: 661420
+    value: locationId=661420
   149:
     name: Забайкальский край
-    value: 661460
+    value: locationId=661460
   150:
     name: Чита
-    value: 661950
+    value: locationId=661950
   151:
     name: Ярославская область
-    value: 662530
+    value: locationId=662530
   152:
     name: Ярославль
-    value: 662810
+    value: locationId=662810
   153:
     name: Ненецкий автономный округ
-    value: 640001
+    value: locationId=640001
   154:
     name: Нарьян-Мар
-    value: 653371
+    value: locationId=653371
   155:
     name: Ханты-Мансийский автономный округ - Югра
-    value: 660300
+    value: locationId=660300
   156:
     name: Ханты-Мансийск
-    value: 660680
+    value: locationId=660680
   157:
     name: Чукотский автономный округ
-    value: 662280
+    value: locationId=662280
   158:
     name: Анадырь
-    value: 662290
+    value: locationId=662290
   159:
     name: Ямало-Ненецкий автономный округ
-    value: 662330
+    value: locationId=662330
   160:
     name: Салехард
-    value: 662460
+    value: locationId=662460
   161:
     name: Республика Крым
-    value: 621550
+    value: locationId=621550
   162:
     name: Симферополь
-    value: 621565
+    value: locationId=621565
   163:
     name: Севастополь
-    value: 621585
+    value: locationId=621585
   164:
     name: Санкт-Петербург и ЛО
-    value: 107621
+    value: locationId=107621
   165:
     name: Москва и МО
-    value: 107620
+    value: locationId=107620

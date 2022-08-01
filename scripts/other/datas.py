@@ -7,8 +7,6 @@ import scripts.other.read_write_files as working_with_file
 
 class ParseSettings(BaseModel):
     parse_settings = working_with_file.load_yaml('./parse_settings.yml')
-    location: int=parse_settings['location']
-    category: int=parse_settings['category']
     log_level: str='info'
     deep_scan: bool=parse_settings['deep_scan']
     look_up_date: int=parse_settings['look_up_date']

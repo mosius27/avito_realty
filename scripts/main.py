@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 import time
 import random
 import logging
@@ -9,6 +10,8 @@ import os
 import sys
 from datetime import datetime, timedelta
 from multiprocessing import Process, RLock, Manager
+
+from bs4 import BeautifulSoup
 import other.read_write_files as working_with_file
 import other.create_search_link as create_search_link
 import other.datas as datas
@@ -83,7 +86,6 @@ def read_write_data(self, **kwargs):
             if '.txt' in kwargs['path']:
                 working_with_file.write_list_in_txt(path=kwargs['path'], var=kwargs['var'])
 
-
 class AvitoRealty():
     
     def __init__(self):
@@ -96,8 +98,8 @@ class AvitoRealty():
         generator_links_settings = read_write_data(self, path=datas.Paths().create_search_link_settings, action='read')
         category = read_write_data(self, path=datas.Paths().categories, action='read')
         location = read_write_data(self, path=datas.Paths().locations, action='read')
-        self.search_link = create_search_link.createSearchLink(generator_links_settings, category, location)
-        self.search_links_list = self.checkNumAds()
+        self.search_link = create_search_link.createSearchLink(generator_links_settings, category['category'], location['location'])
+        self.search_links_list = self.manager.list(self.checkNumAds())
         data = {'Дата_публикации': 'Дата_публикации',
             'Заголовок': 'Заголовок',
             'Тип_недвижимости': 'Тип_недвижимости',
@@ -131,6 +133,7 @@ class AvitoRealty():
         self.logger.info('Начало сбора ссылок на объявления')
         if datas.ParseSettings().deep_scan == True:
             page = self.manager.Value('', value=1)
+            self.search_links_list
             for search_link in self.search_links_list:
                 while True:
                     try: 
@@ -173,32 +176,51 @@ class AvitoRealty():
                         if is_lastPage: break
                         page += 1
 
-        if datas.ParseSettings().deep_scan == True:
+        elif datas.ParseSettings().deep_scan == False:
             
             for search_link in self.search_links_list:
                 page = self.manager.Value('', value=1)
-                try:
-                    url = f'{self.search_link}&p={page}&s=104'
+                while True:
+                    try: 
+                        if ip_is_blocked == True: page -= 1
+                    except: pass
+                    ads = read_write_data(self, path=self.paths['ads link'], action='read')
+                    processed = read_write_data(self, path=self.paths['processed links'], action='read')
+                    self.logger.info(f'Номер страницы: {page}')
+                    try:
+                        url = f'{self.search_link}&p={page}&s=104'
 
-                    if self.method.value == 'selenium':
-                        newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=url, driver=self.driver)
-                    
-                    if ip_is_blocked == True: 
-                        self.num_error = 0
-                        self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
-                        self.driver = startBrowser(self)
-                        continue
+                        if self.method.value == 'selenium':
+                            newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=url, driver=self.driver)
+                        
+                        if ip_is_blocked == True: 
+                            self.num_error = 0
+                            self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
+                            self.driver = startBrowser(self)
+                            continue
 
-                    for ad in newAds:
+                        for ad in newAds:
+                            if self.parse_settings['check new ad on processed'] == True:
+                                if ad not in ads and ad not in processed:
+                                    ads.append(ad)
+                            else:
+                                if ad not in ads:
+                                    ads.append(ad)
+
+                        self.logger.info(f'Собрано ссылок: {len(ads)}')
+                    except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
+                    finally:
                         if self.parse_settings['check new ad on processed'] == True:
-                            if ad not in ads and ad not in processed:
-                                ads.append(ad)
-                        else:
-                            if ad not in ads:
-                                ads.append(ad)
+                            processed = read_write_data(self, path=self.paths['processed links'], action='read')
+                            ads = list(set(ads) - set(processed))
+                        self.logger.debug('Сохраняемые объявления {}'.format(ads))
+                        read_write_data(self, path=self.paths['ads link'], var=ads, action='write')
+                        time_pause = time_wait(self.delay.value)
+                        self.logger.info(f'Ожидание: {time_pause} сек')
+                        time.sleep(time_pause)
+                        if is_lastPage: break
+                        page += 1
 
-                    self.logger.info(f'Собрано ссылок: {len(ads)}')
-                except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
     def ads_data(self):
         from avito import Check_ad
 
@@ -310,32 +332,63 @@ class AvitoRealty():
 
     def checkNumAds(self):
         search_links_list = []
-        check_count_ad_link = f'{self.search_link}&countOnly=1'
-        driver = startBrowser(self)
-        
+        check_count_ad_link = f'{self.search_link}'
+        startBrowser(self)
+        self.driver.get(check_count_ad_link)
+        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+        j = json.loads(soup.text)
+        total_ads = j['totalCount']
+        minPrice_filter = 0
+        maxPrice_filter = 0
+        step_price = 1000000
+        if total_ads > 5000:
+            result_ads = 0
+            maxPrice_filter += step_price
+            while result_ads < total_ads:
+                link = f'{self.search_link}&pmin={minPrice_filter}&pmax={maxPrice_filter}'
+                self.driver.get(link)
+                soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+                j = json.loads(soup.text)
+                count_ads = j['totalCount']
+                if count_ads in range(4000, 5000):
+                    search_links_list.append(link)
+                    step_price = 1000000
+                    minPrice_filter = maxPrice_filter + 1
+                    maxPrice_filter += step_price
+                    result_ads += count_ads
+                elif count_ads > 5000:
+                    step_price //= 2
+                    maxPrice_filter = maxPrice_filter - step_price
+                elif count_ads < 4000:
+                    step_price //= 2
+                    maxPrice_filter += step_price
+                    
+
+        else: 
+            search_links_list.append(self.search_link)
         return search_links_list
 
     def startProcess(self):
         procs = []
 
 if __name__ == "__main__":
-    # carprice = AvitoRealty()
-    # carprice.get_ads()
-    data = {'Дата_публикации': '2022-07-29 13:57:53',
-            'Заголовок': 'Заголовок',
-            'Тип_недвижимости': 'Тип_недвижимости',
-            'Описание': 'Описание',
-            'Цена': 1,
-            'Регион': 'Регион',
-            'Город': 'Город',
-            'Адрес': 'Адрес',
-            'Url': 'Url',
-            'Изображения': 'Изображения'
-            }
-    data = datas.Ad_Data(**data)
-    params = {'qwe': 'qwe', 'adszxc': 'adszxc'}
-    # working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, 'qwe')
-    # working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, 'adszxc')
+    carprice = AvitoRealty()
+    carprice.start()
+    # data = {'Дата_публикации': '2022-07-29 13:57:53',
+    #         'Заголовок': 'Заголовок',
+    #         'Тип_недвижимости': 'Тип_недвижимости',
+    #         'Описание': 'Описание',
+    #         'Цена': 1,
+    #         'Регион': 'Регион',
+    #         'Город': 'Город',
+    #         'Адрес': 'Адрес',
+    #         'Url': 'Url',
+    #         'Изображения': 'Изображения'
+    #         }
+    # data = datas.Ad_Data(**data)
+    # params = {'qwe': 'qwe', 'adszxc': 'adszxc'}
+    # # working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, 'qwe')
+    # # working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, 'adszxc')
 
-    working_with_file.insert_table_PostgresSQL(datas.ParseSettings().db_access, dict(data), params)
-    ...
+    # working_with_file.insert_table_PostgresSQL(datas.ParseSettings().db_access, dict(data), params)
+    # ...

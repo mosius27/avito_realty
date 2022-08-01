@@ -118,18 +118,18 @@ def create_table_PostgresSQL(settings, var: dict):
         connection.autocommit = True
         with connection.cursor() as cursor:
             cursor.execute(
-                f"""CREATE tABLE IF NOT EXISTS test(
+                f"""CREATE tABLE IF NOT EXISTS {settings['db_name']}(
                     id serial PRIMARY KEY,
-                    {var.date_published} timestamp,
-                    {var.title} text,
-                    {var.type_realty} text,
-                    {var.description} text,
-                    {var.price} integer,
-                    {var.region} text,
-                    {var.city} text,
-                    {var.address} text,
-                    {var.url} text,
-                    {var.urls_image} text);
+                    {var.Дата_публикации} timestamp,
+                    {var.Заголовок} text,
+                    {var.Тип_недвижимости} text,
+                    {var.Описание} text,
+                    {var.Цена} integer,
+                    {var.Регион} text,
+                    {var.Город} text,
+                    {var.Адрес} text,
+                    {var.Url} text,
+                    {var.Изображения} text);
                 """
             )
             
