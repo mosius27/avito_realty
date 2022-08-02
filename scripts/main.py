@@ -113,113 +113,130 @@ class AvitoRealty():
             }
         data = datas.Ad_Data(**data)
         working_with_file.create_table_PostgresSQL(datas.ParseSettings().db_access, data)
-
+        
     def start(self):
+        self.multiprocess_settings = read_write_data(self, path=datas.Paths().multiprocess_settings, action='read')
+        if self.multiprocess_settings['use multiprocessing'] == True:
+            self.startProcess()
+        else: self.beginning_programm()
+    
+    def beginning_programm(self):
+        self.logger = initLogger(path=f'{os.path.abspath(datas.Paths().log_folder)}\\{multiprocessing.current_process().name}.log', logLvl=datas.ParseSettings().log_level)
+        startBrowser(self)
+        self.ads = self.manager.list(read_write_data(self, path=datas.Paths().ads_link, action='read'))
         if datas.ParseSettings().work_mode == 'get_ads':
             self.get_ads()
 
         if datas.ParseSettings().work_mode == 'ads_data':
-            self.ads = self.manager.list(read_write_data(self, path=datas.Paths().ads_link, action='read'))
             self.ads_data()
 
         if datas.ParseSettings().work_mode == 'all':
             self.get_ads()
-            self.ads = self.manager.list(read_write_data(self, path=datas.Paths().ads_link, action='read'))
             self.ads_data()
-    
+
     def get_ads(self):
         from avito import Get_ads
-        
+        months = {
+            'янв': 1,
+            'фев': 2,
+            'мар': 3,
+            'апр': 4,
+            'мая': 5,
+            'июн': 6,
+            'июл': 7,
+            'авг': 8,
+            'сент': 9,
+            'окт': 10,
+            'ноя': 11,
+            'дек': 12
+        }
         self.logger.info('Начало сбора ссылок на объявления')
         if datas.ParseSettings().deep_scan == True:
-            page = self.manager.Value('', value=1)
-            self.search_links_list
-            for search_link in self.search_links_list:
-                while True:
-                    try: 
-                        if ip_is_blocked == True: page -= 1
-                    except: pass
-                    ads = read_write_data(self, path=self.paths['ads link'], action='read')
-                    processed = read_write_data(self, path=self.paths['processed links'], action='read')
-                    self.logger.info(f'Номер страницы: {page}')
-                    try:
-                        url = f'{self.search_link}&p={page}'
+            while self.search_links_list:
+                if datas.ParseSettings().check_new_ad_on_processed == True:
+                    processed = self.manager.list(read_write_data(self, path=datas.Paths().processed_links, action='read'))
+                try:
+                    url = self.search_links_list.pop(0)
 
-                        if self.method.value == 'selenium':
-                            newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=url, driver=self.driver)
-                        
-                        if ip_is_blocked == True: 
-                            self.num_error = 0
-                            self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
-                            self.driver = startBrowser(self)
-                            continue
+                    newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=f'{url}&s=104', driver=self.driver)
+                    
+                    if ip_is_blocked == True: 
+                        self.search_links_list.append(url)
+                        self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
+                        self.driver = startBrowser(self)
+                        continue
 
-                        for ad in newAds:
-                            if self.parse_settings['check new ad on processed'] == True:
-                                if ad not in ads and ad not in processed:
-                                    ads.append(ad)
-                            else:
-                                if ad not in ads:
-                                    ads.append(ad)
+                    for ad in newAds:
+                        ad = ad['link']
+                        if datas.ParseSettings().check_new_ad_on_processed == True:
+                            if ad not in ads and ad not in processed:
+                                ads.append(ad)
+                        else:
+                            if ad not in ads:
+                                ads.append(ad)
 
-                        self.logger.info(f'Собрано ссылок: {len(ads)}')
-                    except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
-                    finally:
-                        if self.parse_settings['check new ad on processed'] == True:
-                            processed = read_write_data(self, path=self.paths['processed links'], action='read')
-                            ads = list(set(ads) - set(processed))
-                        self.logger.debug('Сохраняемые объявления {}'.format(ads))
-                        read_write_data(self, path=self.paths['ads link'], var=ads, action='write')
-                        time_pause = time_wait(self.delay.value)
-                        self.logger.info(f'Ожидание: {time_pause} сек')
-                        time.sleep(time_pause)
-                        if is_lastPage: break
-                        page += 1
+                    self.logger.info(f'Собрано ссылок: {len(ads)}')
+                except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
+                finally:
+                    if datas.ParseSettings().check_new_ad_on_processed == True:
+                        processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
+                        ads = list(set(ads) - set(processed))
+                    self.logger.debug('Сохраняемые объявления {}'.format(ads))
+                    read_write_data(self, path=datas.Paths().ads_link, var=ads, action='write')
+                    time_pause = time_wait()
+                    self.logger.info(f'Ожидание: {time_pause} сек')
+                    time.sleep(time_pause)
 
         elif datas.ParseSettings().deep_scan == False:
             
-            for search_link in self.search_links_list:
-                page = self.manager.Value('', value=1)
-                while True:
-                    try: 
-                        if ip_is_blocked == True: page -= 1
-                    except: pass
-                    ads = read_write_data(self, path=self.paths['ads link'], action='read')
-                    processed = read_write_data(self, path=self.paths['processed links'], action='read')
-                    self.logger.info(f'Номер страницы: {page}')
-                    try:
-                        url = f'{self.search_link}&p={page}&s=104'
+            while self.search_links_list:
 
-                        if self.method.value == 'selenium':
-                            newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=url, driver=self.driver)
-                        
-                        if ip_is_blocked == True: 
-                            self.num_error = 0
-                            self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
-                            self.driver = startBrowser(self)
+                if datas.ParseSettings().check_new_ad_on_processed == True:
+                    processed = self.manager.list(read_write_data(self, path=datas.Paths().processed_links, action='read'))
+                
+                try:
+                    url = self.search_links_list.pop(0)
+
+                    newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=f'{url}&s=104', driver=self.driver)
+                    
+                    if ip_is_blocked == True: 
+                        self.search_links_list.append(url)
+                        self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
+                        self.driver = startBrowser(self)
+                        continue
+
+                    for ad in newAds:
+                        date_published = ad['date_published']
+                        ad = ad['link']
+                        for m in months:
+                            for date in date_published.split(' '):
+                                if m.lower() in date.lower():
+                                    date_published = date_published.replace(date, f'{str(months[m])} {datetime.now().year}')
+                        d = datetime.strptime(date_published, '%d %m %Y %H:%M').strftime('%Y-%m-%d')
+                        d = datetime.strptime(d, '%Y-%m-%d')
+                        now = datetime.now().strftime('%Y-%m-%d')
+                        now = datetime.strptime(now, '%Y-%m-%d')
+                        days_on_avito = (now - d).seconds // 3600
+                        if days_on_avito > datas.ParseSettings.look_up_date:
                             continue
+                        if datas.ParseSettings().check_new_ad_on_processed == True:
+                            if ad not in ads and ad not in processed:
+                                ads.append(ad)
+                        else:
+                            if ad not in ads:
+                                ads.append(ad)
 
-                        for ad in newAds:
-                            if self.parse_settings['check new ad on processed'] == True:
-                                if ad not in ads and ad not in processed:
-                                    ads.append(ad)
-                            else:
-                                if ad not in ads:
-                                    ads.append(ad)
-
-                        self.logger.info(f'Собрано ссылок: {len(ads)}')
-                    except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
-                    finally:
-                        if self.parse_settings['check new ad on processed'] == True:
-                            processed = read_write_data(self, path=self.paths['processed links'], action='read')
-                            ads = list(set(ads) - set(processed))
-                        self.logger.debug('Сохраняемые объявления {}'.format(ads))
-                        read_write_data(self, path=self.paths['ads link'], var=ads, action='write')
-                        time_pause = time_wait(self.delay.value)
-                        self.logger.info(f'Ожидание: {time_pause} сек')
-                        time.sleep(time_pause)
-                        if is_lastPage: break
-                        page += 1
+                    self.logger.info(f'Собрано ссылок: {len(ads)}')
+                except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
+                finally:
+                    if datas.ParseSettings().check_new_ad_on_processed == True:
+                        processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
+                        ads = list(set(ads) - set(processed))
+                    self.logger.debug('Сохраняемые объявления {}'.format(ads))
+                    read_write_data(self, path=datas.Paths().ads_link, var=ads, action='write')
+                    time_pause = time_wait()
+                    self.logger.info(f'Ожидание: {time_pause} сек')
+                    time.sleep(time_pause)
 
     def ads_data(self):
         from avito import Check_ad
@@ -228,40 +245,37 @@ class AvitoRealty():
         while self.ads:
             ad = self.ads.pop(0)
             self.logger.info('Проверка объявления {}'.format(ad))
-            with self.lock:
-                read_write_data(self, path=datas.Paths().ads_link, var=self.ads, action='write')
-                if datas.ParseSettings().save_checked_ads == True:
-                    processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
-                    processed.append(ad)
-                    read_write_data(self, path=datas.Paths().processed_links, var=processed, action='write')
+            read_write_data(self, path=datas.Paths().ads_link, var=self.ads, action='write')
+            if datas.ParseSettings().save_checked_ads == True:
+                processed = self.manager.list(read_write_data(self, path=datas.Paths().processed_links, action='read'))
+                processed.append(ad)
+                read_write_data(self, path=datas.Paths().processed_links, var=processed, action='write')
             try:
                 ad_info, ip_is_blocked = Check_ad.check_ad_browser(url=ad, driver=self.driver)
 
                 if ip_is_blocked == True: 
-                    self.num_error = 0
                     self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
                     self.driver = startBrowser(self)                    
-                    with self.lock:
-                        self.ads = read_write_data(self, path=self.paths['ads link'], action='read')
-                        self.ads.append(ad)
-                        read_write_data(self, path=self.paths['ads link'], var=self.ads, action='write')
-                        processed = read_write_data(self, path=self.paths['processed links'], action='read')
-                        processed.remove(ad)
-                        read_write_data(self, path=self.paths['processed links'], var=processed, action='write')
+                    self.ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
+                    self.ads.append(ad)
+                    read_write_data(self, path=datas.Paths().ads_link, var=self.ads, action='write')
+                    processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
+                    processed.remove(ad)
+                    read_write_data(self, path=datas.Paths().processed_links, var=processed, action='write')
                     continue
 
             except:
                 with self.lock:
-                    self.ads = read_write_data(self, path=self.paths['ads link'], action='read')
+                    self.ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
                     self.ads.append(ad)
-                    read_write_data(self, path=self.paths['ads link'], var=self.ads, action='write')
-                    processed = read_write_data(self, path=self.paths['processed links'], action='read')
+                    read_write_data(self, path=datas.Paths().ads_link, var=self.ads, action='write')
+                    processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
                     processed.remove(ad)
-                    read_write_data(self, path=self.paths['processed links'], var=processed, action='write')
+                    read_write_data(self, path=datas.Paths().processed_links, var=processed, action='write')
 
                 self.logger.error('Не удалось получить данные объявления {}'.format(traceback.format_exc()))
 
-                time_pause = time_wait(self.delay.value)
+                time_pause = time_wait()
                 self.logger.info(f'Ожидание: {time_pause} сек')
                 time.sleep(time_pause)
                 continue
@@ -326,11 +340,12 @@ class AvitoRealty():
 
             except: self.logger.error('Ошибка при сохранении данных\n{}'.format(traceback.format_exc()))
             finally:
-                time_pause = time_wait(self.delay.value)
+                time_pause = time_wait()
                 self.logger.info(f'Ожидание: {time_pause} сек')
                 time.sleep(time_pause)
 
     def checkNumAds(self):
+        self.logger.info('Формирование очереди ссылок')
         search_links_list = []
         check_count_ad_link = f'{self.search_link}'
         startBrowser(self)
@@ -345,13 +360,24 @@ class AvitoRealty():
             result_ads = 0
             maxPrice_filter += step_price
             while result_ads < total_ads:
-                link = f'{self.search_link}&pmin={minPrice_filter}&pmax={maxPrice_filter}'
-                self.driver.get(link)
-                soup = BeautifulSoup(self.driver.page_source, 'html.parser')
-                j = json.loads(soup.text)
+                soup = j = ''
+                try:
+                    link = f'{self.search_link}&pmin={minPrice_filter}&pmax={maxPrice_filter}'
+                    self.driver.get(link)
+                    soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+                    j = json.loads(soup.text)
+                except: 
+                    self.logger.info('Не удалось получить данные')
+                    continue
                 count_ads = j['totalCount']
-                if count_ads in range(4000, 5000):
-                    search_links_list.append(link)
+                if (count_ads in range(4000, 5000) and (total_ads - result_ads) > 5000) or (result_ads + count_ads) >= total_ads:
+                    if (count_ads % 50)  != 0:
+                        for p in range(count_ads//50 + 1):
+                            search_links_list.append(f'{link}&p={p+1}')
+                    elif (count_ads % 50)  == 0:
+                        for p in range(1, count_ads//50):
+                            search_links_list.append(f'{link}&p={p+1}')
+                    self.logger.info(f'В очередь добавлены ссылки с диапозном цен: {minPrice_filter} - {maxPrice_filter}')
                     step_price = 1000000
                     minPrice_filter = maxPrice_filter + 1
                     maxPrice_filter += step_price
@@ -359,36 +385,33 @@ class AvitoRealty():
                 elif count_ads > 5000:
                     step_price //= 2
                     maxPrice_filter = maxPrice_filter - step_price
-                elif count_ads < 4000:
-                    step_price //= 2
+                elif 3000 < count_ads < 4000:
                     maxPrice_filter += step_price
-                    
+                elif count_ads < 3000:
+                    step_price *= 2
+                    maxPrice_filter += step_price
 
         else: 
-            search_links_list.append(self.search_link)
+            if (total_ads % 50)  != 0:
+                for p in range(total_ads//50 + 1):
+                    search_links_list.append(f'{check_count_ad_link}&p={p+1}')
+            elif (total_ads % 50)  == 0:
+                for p in range(1, total_ads//50):
+                    search_links_list.append(f'{check_count_ad_link}&p={p+1}')
+        self.driver.close()
+        self.driver.quit()
         return search_links_list
 
     def startProcess(self):
         procs = []
+        for i in range(self.multiprocess_settings['num process']):
+            proc = Process(target=self.beginning_programm, args=(self,), name=f'Process-{i+1}')
+            procs.append(proc)
+            proc.start()
+
+        for proc in procs:
+            proc.join()
 
 if __name__ == "__main__":
     carprice = AvitoRealty()
     carprice.start()
-    # data = {'Дата_публикации': '2022-07-29 13:57:53',
-    #         'Заголовок': 'Заголовок',
-    #         'Тип_недвижимости': 'Тип_недвижимости',
-    #         'Описание': 'Описание',
-    #         'Цена': 1,
-    #         'Регион': 'Регион',
-    #         'Город': 'Город',
-    #         'Адрес': 'Адрес',
-    #         'Url': 'Url',
-    #         'Изображения': 'Изображения'
-    #         }
-    # data = datas.Ad_Data(**data)
-    # params = {'qwe': 'qwe', 'adszxc': 'adszxc'}
-    # # working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, 'qwe')
-    # # working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, 'adszxc')
-
-    # working_with_file.insert_table_PostgresSQL(datas.ParseSettings().db_access, dict(data), params)
-    # ...

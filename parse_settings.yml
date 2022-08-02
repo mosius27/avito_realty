@@ -7,7 +7,7 @@ db_access:
   table_name: test
 
 # Осуществлять полный сбор объявлений
-deep_scan: !!bool True
+deep_scan: !!bool False
 
 # Сбор объявлений за n дней
 look_up_date: !!int 2

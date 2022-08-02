@@ -42,15 +42,19 @@ def query_tag(content):
             else: is_lastPage = False
             links = []
             for item in items:
+                d = {}
                 # ads['items'].append(item)
-                try: links.append(f"https://avito.ru{item['urlPath']}")
+                try:
+                    d['link'] = f"https://avito.ru{item['urlPath']}"
+                    d['date_published'] = item['iva']['DateInfoStep'][0]['payload']['absolute']
+
+                    links.append(d)
                 except: pass
 
             return links, is_lastPage, ip_is_blocked
 
 def default_tag(content):
     from bs4 import BeautifulSoup
-
     soup = BeautifulSoup(content, 'html.parser')
     if 'Доступ с вашего IP-адреса временно ограничен' in soup.text or 'Доступ с Вашего IP временно ограничен' in soup.text: 
         links = []
@@ -69,33 +73,13 @@ def default_tag(content):
         if soup.find_all('a', {'class': 'pagination-page'})[-1].text.lower() != 'Последняя'.lower(): is_lastPage = True
         else: is_lastPage = False
         for item in items:
-            links.append(f"https://avito.ru{item.find('div', {'class': 'iva-item-titleStep-pdebR'}).find('a').get('href')}")
+            d = {}
+            d['link'] = f"https://avito.ru{item.find('div', {'class': 'iva-item-titleStep-pdebR'}).find('a').get('href')}"
+            links.append(d)
 
         return links, is_lastPage, ip_is_blocked
 
 class Get_ads():
-
-    def initLogger(path: str, logLvl: str):
-        with open(path, 'w', encoding='utf-8') as file: pass
-
-        logger = logging.getLogger()
-        formatter= logging.Formatter('log time - %(asctime)s | log level - %(levelname)s | [%(filename)s: line - %(lineno)d in function %(funcName)s] | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')#, level=logLvl.upper())
-
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        console_handler.setLevel(logLvl.upper())
-        logger.addHandler(console_handler)
-
-        file_handler = logging.FileHandler(filename=path, encoding='utf-8')
-        file_handler.setFormatter(formatter)
-        file_handler.setLevel(logLvl.upper())
-        logger.addHandler(file_handler)
-
-        console_handler.setLevel(logLvl.upper())
-        file_handler.setLevel(logLvl.upper())
-        logger.setLevel(logLvl.upper())
-
-        return logger
 
     @defenition_tag
     def get_ads_request(url: str, **kwargs):
