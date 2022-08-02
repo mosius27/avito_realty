@@ -91,15 +91,13 @@ class AvitoRealty():
     def __init__(self):
         self.lock = RLock()
         self.logger = initLogger(path=f'{os.path.abspath(datas.Paths().log_folder)}\\{multiprocessing.current_process().name}.log', logLvl=datas.ParseSettings().log_level)
-        self.manager = Manager()
-        self.proxyes = self.manager.list(read_write_data(self, path=datas.Paths().proxy, action='read'))
-        if datas.ParseSettings().check_new_ad_on_processed == True:
-            self.processed = self.manager.list(read_write_data(self, path=datas.Paths().processed_links, action='read'))
+        manager = Manager()
+        self.proxyes = manager.list(read_write_data(self, path=datas.Paths().proxy, action='read'))
         generator_links_settings = read_write_data(self, path=datas.Paths().create_search_link_settings, action='read')
         category = read_write_data(self, path=datas.Paths().categories, action='read')
         location = read_write_data(self, path=datas.Paths().locations, action='read')
         self.search_link = create_search_link.createSearchLink(generator_links_settings, category['category'], location['location'])
-        self.search_links_list = self.manager.list(self.checkNumAds())
+        self.search_links_list = manager.list(self.checkNumAds())
         data = {'Дата_публикации': 'Дата_публикации',
             'Заголовок': 'Заголовок',
             'Тип_недвижимости': 'Тип_недвижимости',
@@ -113,6 +111,9 @@ class AvitoRealty():
             }
         data = datas.Ad_Data(**data)
         working_with_file.create_table_PostgresSQL(datas.ParseSettings().db_access, data)
+        if datas.ParseSettings().save_checked_ads == True or datas.ParseSettings().check_new_ad_on_processed == True:
+            self.processed = manager.list(read_write_data(self, path=datas.Paths().processed_links, action='read'))
+        self.ads = manager.list(read_write_data(self, path=datas.Paths().ads_link, action='read'))
         
     def start(self):
         self.multiprocess_settings = read_write_data(self, path=datas.Paths().multiprocess_settings, action='read')
@@ -123,7 +124,6 @@ class AvitoRealty():
     def beginning_programm(self):
         self.logger = initLogger(path=f'{os.path.abspath(datas.Paths().log_folder)}\\{multiprocessing.current_process().name}.log', logLvl=datas.ParseSettings().log_level)
         startBrowser(self)
-        self.ads = self.manager.list(read_write_data(self, path=datas.Paths().ads_link, action='read'))
         if datas.ParseSettings().work_mode == 'get_ads':
             self.get_ads()
 
@@ -153,8 +153,6 @@ class AvitoRealty():
         self.logger.info('Начало сбора ссылок на объявления')
         if datas.ParseSettings().deep_scan == True:
             while self.search_links_list:
-                if datas.ParseSettings().check_new_ad_on_processed == True:
-                    processed = self.manager.list(read_write_data(self, path=datas.Paths().processed_links, action='read'))
                 try:
                     url = self.search_links_list.pop(0)
 
@@ -169,7 +167,7 @@ class AvitoRealty():
                     for ad in newAds:
                         ad = ad['link']
                         if datas.ParseSettings().check_new_ad_on_processed == True:
-                            if ad not in ads and ad not in processed:
+                            if ad not in ads and ad not in self.processed:
                                 ads.append(ad)
                         else:
                             if ad not in ads:
@@ -179,8 +177,8 @@ class AvitoRealty():
                 except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
                 finally:
                     if datas.ParseSettings().check_new_ad_on_processed == True:
-                        processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
-                        ads = list(set(ads) - set(processed))
+                        self.processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
+                        ads = list(set(ads) - set(self.processed))
                     self.logger.debug('Сохраняемые объявления {}'.format(ads))
                     read_write_data(self, path=datas.Paths().ads_link, var=ads, action='write')
                     time_pause = time_wait()
@@ -191,9 +189,6 @@ class AvitoRealty():
             
             while self.search_links_list:
 
-                if datas.ParseSettings().check_new_ad_on_processed == True:
-                    processed = self.manager.list(read_write_data(self, path=datas.Paths().processed_links, action='read'))
-                
                 try:
                     url = self.search_links_list.pop(0)
 
@@ -220,7 +215,7 @@ class AvitoRealty():
                         if days_on_avito > datas.ParseSettings.look_up_date:
                             continue
                         if datas.ParseSettings().check_new_ad_on_processed == True:
-                            if ad not in ads and ad not in processed:
+                            if ad not in ads and ad not in self.processed:
                                 ads.append(ad)
                         else:
                             if ad not in ads:
@@ -230,8 +225,8 @@ class AvitoRealty():
                 except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
                 finally:
                     if datas.ParseSettings().check_new_ad_on_processed == True:
-                        processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
-                        ads = list(set(ads) - set(processed))
+                        self.processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
+                        ads = list(set(ads) - set(self.processed))
                     self.logger.debug('Сохраняемые объявления {}'.format(ads))
                     read_write_data(self, path=datas.Paths().ads_link, var=ads, action='write')
                     time_pause = time_wait()
@@ -247,9 +242,8 @@ class AvitoRealty():
             self.logger.info('Проверка объявления {}'.format(ad))
             read_write_data(self, path=datas.Paths().ads_link, var=self.ads, action='write')
             if datas.ParseSettings().save_checked_ads == True:
-                processed = self.manager.list(read_write_data(self, path=datas.Paths().processed_links, action='read'))
-                processed.append(ad)
-                read_write_data(self, path=datas.Paths().processed_links, var=processed, action='write')
+                self.processed.append(ad)
+                read_write_data(self, path=datas.Paths().processed_links, var=self.processed, action='write')
             try:
                 ad_info, ip_is_blocked = Check_ad.check_ad_browser(url=ad, driver=self.driver)
 
@@ -259,9 +253,9 @@ class AvitoRealty():
                     self.ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
                     self.ads.append(ad)
                     read_write_data(self, path=datas.Paths().ads_link, var=self.ads, action='write')
-                    processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
-                    processed.remove(ad)
-                    read_write_data(self, path=datas.Paths().processed_links, var=processed, action='write')
+                    self.processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
+                    self.processed.remove(ad)
+                    read_write_data(self, path=datas.Paths().processed_links, var=self.processed, action='write')
                     continue
 
             except:
@@ -269,9 +263,9 @@ class AvitoRealty():
                     self.ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
                     self.ads.append(ad)
                     read_write_data(self, path=datas.Paths().ads_link, var=self.ads, action='write')
-                    processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
-                    processed.remove(ad)
-                    read_write_data(self, path=datas.Paths().processed_links, var=processed, action='write')
+                    self.processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
+                    self.processed.remove(ad)
+                    read_write_data(self, path=datas.Paths().processed_links, var=self.processed, action='write')
 
                 self.logger.error('Не удалось получить данные объявления {}'.format(traceback.format_exc()))
 
