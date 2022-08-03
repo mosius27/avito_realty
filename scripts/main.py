@@ -63,7 +63,9 @@ def initLogger(path: str, logLvl: str):
 
 def beginning_programm(self):
     self.logger = initLogger(path=f'{os.path.abspath(datas.Paths().log_folder)}\\{multiprocessing.current_process().name}.log', logLvl=datas.ParseSettings().log_level)
-    self.checkNumAds()
+    with self.lock:
+        if self.search_links_list.qsize > 0:
+            self.checkNumAds()
     startBrowser(self)
     if datas.ParseSettings().work_mode == 'get_ads':
         self.get_ads()
