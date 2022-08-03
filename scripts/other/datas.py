@@ -17,6 +17,8 @@ class ParseSettings(BaseModel):
     use_proxy: bool=parse_settings['use_proxy']
     work_mode: str=parse_settings['work_mode']
     db_access: dict=parse_settings['db_access']
+    use_multiprocessing: bool=parse_settings['use_multiprocessing']
+    num_process: int=parse_settings['num_process']
 
 class Paths(BaseModel):
     paths_settings = working_with_file.load_yaml('./settings/paths.yml')
@@ -26,7 +28,6 @@ class Paths(BaseModel):
     create_search_link_settings: str=paths_settings['create_search_link_settings']
     locations: str=paths_settings['locations']
     categories: str=paths_settings['categories']
-    multiprocess_settings: str=paths_settings['multiprocess_settings']
     proxy: str=paths_settings['proxy']
     log_folder: str=paths_settings['log_folder']
 
