@@ -169,7 +169,7 @@ class AvitoRealty():
                     url = elem
                     self.logger.info('Сбор объявлений со страницы: {}'.format(url))
 
-                    newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=f'{url}&s=104', driver=self.driver)
+                    newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=f'{url}', driver=self.driver)
                     
                     if ip_is_blocked == True: 
                         self.search_links_list.put(url)
@@ -235,11 +235,13 @@ class AvitoRealty():
                             for date in date_published.split(' '):
                                 if m.lower() in date.lower():
                                     date_published = date_published.replace(date, f'{str(months[m])} {datetime.now().year}')
-                        d = datetime.strptime(date_published, '%d %m %Y %H:%M').strftime('%Y-%m-%d')
-                        d = datetime.strptime(d, '%Y-%m-%d')
-                        now = datetime.now().strftime('%Y-%m-%d')
-                        now = datetime.strptime(now, '%Y-%m-%d')
-                        days_on_avito = (now - d).seconds // 3600
+                        try:
+                            d = datetime.strptime(date_published, '%d %m %Y %H:%M').strftime('%Y-%m-%d')
+                            d = datetime.strptime(d, '%Y-%m-%d')
+                            now = datetime.now().strftime('%Y-%m-%d')
+                            now = datetime.strptime(now, '%Y-%m-%d')
+                            days_on_avito = (now - d).seconds // 3600
+                        except: days_on_avito = 0
                         if days_on_avito > datas.ParseSettings().look_up_date:
                             continue
                         if datas.ParseSettings().check_new_ad_on_processed == True:

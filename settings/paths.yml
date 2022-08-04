@@ -6,5 +6,5 @@ create_search_link_settings: !!str ./settings/createSearchLink_settings.yml
 multiprocess_settings: !!str ./settings/multiprocess_settings.yml
 proxy: !!str ./data/proxy.txt
 log_folder: !!str ./data/logs/
-locations: !!str ./settings/locations.yml
-categories: !!str ./settings/categories.yml
+locations: !!str ./locations.yml
+categories: !!str ./categories.yml
