@@ -1,10 +1,10 @@
 db_access:
-  host: 127.0.0.1
-  port: 5432
-  user: postgres
-  password: kjr84!vfibyf_228
-  db_name: test
-  table_name: test
+  host: 
+  port: 
+  user: 
+  password: 
+  db_name: 
+  table_name: 
 
 # Осуществлять полный сбор объявлений
 deep_scan: !!bool False
@@ -13,13 +13,13 @@ deep_scan: !!bool False
 look_up_date: !!int 2
 
 use_multiprocessing: !!bool True
-num_process: !!int 3
+num_process: !!int 4
 
 # Режим работы сбора ссылок и данных с объявлений
 # get_ads - собирать ссылки объявлений
 # ads_data - собирать информацию из объявлений
 # all - Выполнить полный сбор данных. Очередность сбора 1 - сбор ссылок, 2 - сбор информации
-work_mode: !!str ads_data
+work_mode: !!str all
 
 # Задержка между загрузкой страниц в секундах
 delay: 

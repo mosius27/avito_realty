@@ -62,9 +62,10 @@ def initLogger(path: str, logLvl: str):
 
 def beginning_programm(self):
     self.logger = initLogger(path=f'{os.path.abspath(datas.Paths().log_folder)}\\{multiprocessing.current_process().name}.log', logLvl=datas.ParseSettings().log_level)
-    with self.lock:
-        if self.search_links_list.qsize > 0:
-            self.checkNumAds()
+    if datas.ParseSettings().work_mode == 'get_ads' or datas.ParseSettings().work_mode == 'all':
+        with self.lock:
+            if self.search_links_list.qsize() == 0:
+                self.checkNumAds()
     startBrowser(self)
     if datas.ParseSettings().work_mode == 'get_ads':
         self.get_ads()
@@ -115,7 +116,7 @@ class AvitoRealty():
         self.search_link = create_search_link.createSearchLink(generator_links_settings, category['category'], location['location'])
 
         self.checked_page = manager.list([])
-        if datas.ParseSettings.work_mode == 'get_ads' or datas.ParseSettings.work_mode == 'all':
+        if datas.ParseSettings().work_mode == 'get_ads' or datas.ParseSettings().work_mode == 'all':
             self.search_links_list = Queue()
 
         data = {'Дата_публикации': 'Дата_публикации',
@@ -186,7 +187,9 @@ class AvitoRealty():
                                 ads.append(ad)
                     self.checked_page.append(elem)
 
-                except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
+                except: 
+                    self.search_links_list.put(url)
+                    self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
                 finally:
                     with self.lock:
                         if datas.ParseSettings().save_checked_ads == True or datas.ParseSettings().check_new_ad_on_processed == True:
@@ -247,7 +250,9 @@ class AvitoRealty():
                                 ads.append(ad)
                     self.checked_page.append(elem)
 
-                except: self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
+                except: 
+                    self.search_links_list.put(url)
+                    self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
                 finally:
                     with self.lock:
                         if datas.ParseSettings().save_checked_ads == True or datas.ParseSettings().check_new_ad_on_processed == True:
@@ -328,7 +333,7 @@ class AvitoRealty():
 
                         param_dict = {}
                         for param in params:
-
+                            param['title'] = param["title"].strip().replace(' ', '_')
                             if working_with_file.check_exists_collumn_postgresSQL(datas.ParseSettings().db_access, param["title"]) == False:
                                 working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, param["title"])
                             try:
