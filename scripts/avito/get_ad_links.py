@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-from os import link
-import logging
 
 from bs4 import BeautifulSoup
 

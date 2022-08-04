@@ -7,7 +7,6 @@ import logging
 import traceback
 import multiprocessing
 import os
-import sys
 from datetime import datetime, timedelta
 from multiprocessing import Process, RLock, Manager, Queue
 
