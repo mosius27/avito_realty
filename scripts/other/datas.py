@@ -29,7 +29,6 @@ class Paths(BaseModel):
     locations: str=paths_settings['locations']
     categories: str=paths_settings['categories']
     proxy: str=paths_settings['proxy']
-    log_folder: str=paths_settings['log_folder']
 
 class Ad_Data(BaseModel):
     Дата_публикации: str

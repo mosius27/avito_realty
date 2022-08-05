@@ -3,7 +3,6 @@
 import json
 import time
 import random
-import logging
 import traceback
 import multiprocessing
 import os
@@ -14,11 +13,14 @@ from bs4 import BeautifulSoup
 import other.read_write_files as working_with_file
 import other.create_search_link as create_search_link
 import other.datas as datas
+import other.logger as log
+log.Logging()
 
 def time_wait():
     return random.randint(datas.ParseSettings().delay_from, datas.ParseSettings().delay_to)
 
 # Функция запуска selenium браузера
+@log.logger.catch
 def startBrowser(self):
     from browser import Beginnig_browser
 
@@ -32,36 +34,12 @@ def startBrowser(self):
             with self.lock:
                 proxy = self.proxyes.pop(0)
                 self.proxyes.append(proxy)
-                self.logger.info('Применения прокси {} для запуска браузера'.format(proxy))
+                log.logger.info('Применения прокси {} для запуска браузера'.format(proxy))
             self.driver = Beginnig_browser.chrome(proxy=proxy, settings_path=datas.Paths().browser_settings)
         else: self.driver = Beginnig_browser.chrome(settings_path=datas.Paths().browser_settings)
     else: self.driver = Beginnig_browser.chrome(settings_path=datas.Paths().browser_settings)
 
-# Функция инициализирующая logger
-def initLogger(path: str, logLvl: str):
-    with open(path, 'w', encoding='utf-8') as file: pass
-
-    logger = logging.getLogger()
-    formatter= logging.Formatter('{processName} | log time - %(asctime)s | log level - %(levelname)s | [%(filename)s: line - %(lineno)d in function %(funcName)s] | %(message)s'.format(processName=multiprocessing.current_process().name), datefmt='%Y-%m-%d %H:%M:%S')
-
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    console_handler.setLevel(logLvl.upper())
-    logger.addHandler(console_handler)
-
-    file_handler = logging.FileHandler(filename=path, encoding='utf-8')
-    file_handler.setFormatter(formatter)
-    file_handler.setLevel(logLvl.upper())
-    logger.addHandler(file_handler)
-
-    console_handler.setLevel(logLvl.upper())
-    file_handler.setLevel(logLvl.upper())
-    logger.setLevel(logLvl.upper())
-
-    return logger
-
 def beginning_programm(self):
-    self.logger = initLogger(path=f'{os.path.abspath(datas.Paths().log_folder)}\\{multiprocessing.current_process().name}.log', logLvl=datas.ParseSettings().log_level)
     if datas.ParseSettings().work_mode == 'get_ads' or datas.ParseSettings().work_mode == 'all':
         with self.lock:
             if self.search_links_list.qsize() == 0:
@@ -107,13 +85,13 @@ class AvitoRealty():
     
     def __init__(self):
         self.lock = RLock()
-        self.logger = initLogger(path=f'{os.path.abspath(datas.Paths().log_folder)}\\{multiprocessing.current_process().name}.log', logLvl=datas.ParseSettings().log_level)
+        
         manager = Manager()
         self.proxyes = manager.list(read_write_data(self, path=datas.Paths().proxy, action='read'))
         generator_links_settings = read_write_data(self, path=datas.Paths().create_search_link_settings, action='read')
         category = read_write_data(self, path=datas.Paths().categories, action='read')
         location = read_write_data(self, path=datas.Paths().locations, action='read')
-        self.search_link = create_search_link.createSearchLink(generator_links_settings, category['category'], location['location'])
+        self.search_links = create_search_link.createSearchLink(generator_links_settings, category['category'], location['location'])
 
         self.checked_page = manager.list([])
         if datas.ParseSettings().work_mode == 'get_ads' or datas.ParseSettings().work_mode == 'all':
@@ -138,6 +116,7 @@ class AvitoRealty():
             self.startProcess()
         else: beginning_programm()
 
+    @log.logger.catch
     def get_ads(self):
         from avito import Get_ads
         months = {
@@ -155,7 +134,7 @@ class AvitoRealty():
             'дек': 12
         }
         
-        self.logger.info('Начало сбора ссылок на объявления')
+        log.logger.info('Начало сбора ссылок на объявления')
         if datas.ParseSettings().deep_scan == True:
             while self.search_links_list.qsize() > 0:
                 elem = self.search_links_list.get()
@@ -167,13 +146,13 @@ class AvitoRealty():
                         ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
 
                     url = elem
-                    self.logger.info('Сбор объявлений со страницы: {}'.format(url))
+                    log.logger.info('Сбор объявлений со страницы: {}'.format(url))
 
                     newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=f'{url}', driver=self.driver)
                     
                     if ip_is_blocked == True: 
                         self.search_links_list.put(url)
-                        self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
+                        log.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
                         self.driver = startBrowser(self)
                         continue
 
@@ -189,7 +168,7 @@ class AvitoRealty():
 
                 except: 
                     self.search_links_list.put(url)
-                    self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
+                    log.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
                 finally:
                     with self.lock:
                         if datas.ParseSettings().save_checked_ads == True or datas.ParseSettings().check_new_ad_on_processed == True:
@@ -200,11 +179,11 @@ class AvitoRealty():
                             saved_ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
                         ads = list(set(ads) - set(saved_ads))
                         ads = saved_ads + ads
-                        self.logger.info(f'Собрано ссылок: {len(ads)}')
-                        self.logger.debug('Сохраняемые объявления {}'.format(ads))
+                        log.logger.info(f'Собрано ссылок: {len(ads)}')
+                        log.logger.debug('Сохраняемые объявления {}'.format(ads))
                         read_write_data(self, path=datas.Paths().ads_link, var=ads, action='write')
                     time_pause = time_wait()
-                    self.logger.info(f'Ожидание: {time_pause} сек')
+                    log.logger.info(f'Ожидание: {time_pause} сек')
                     time.sleep(time_pause)
 
         elif datas.ParseSettings().deep_scan == False:
@@ -218,13 +197,13 @@ class AvitoRealty():
                             processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
                         ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
                     url = elem
-                    self.logger.info('Сбор объявлений со страницы: {}'.format(url))
+                    log.logger.info('Сбор объявлений со страницы: {}'.format(url))
 
                     newAds, is_lastPage, ip_is_blocked = Get_ads.get_ads_browser(url=f'{url}&s=104', driver=self.driver)
                     
                     if ip_is_blocked == True: 
                         self.search_links_list.put(url)
-                        self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
+                        log.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
                         self.driver = startBrowser(self)
                         continue
 
@@ -254,7 +233,7 @@ class AvitoRealty():
 
                 except: 
                     self.search_links_list.put(url)
-                    self.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
+                    log.logger.info('Не удалось загрузить страницу\n{}'.format(traceback.format_exc()))
                 finally:
                     with self.lock:
                         if datas.ParseSettings().save_checked_ads == True or datas.ParseSettings().check_new_ad_on_processed == True:
@@ -265,17 +244,18 @@ class AvitoRealty():
                             saved_ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
                         ads = list(set(ads) - set(saved_ads))
                         ads = saved_ads + ads
-                        self.logger.info(f'Собрано ссылок: {len(ads)}')
-                        self.logger.debug('Сохраняемые объявления {}'.format(ads))
+                        log.logger.info(f'Собрано ссылок: {len(ads)}')
+                        log.logger.debug('Сохраняемые объявления {}'.format(ads))
                         read_write_data(self, path=datas.Paths().ads_link, var=ads, action='write')
                     time_pause = time_wait()
-                    self.logger.info(f'Ожидание: {time_pause} сек')
+                    log.logger.info(f'Ожидание: {time_pause} сек')
                     time.sleep(time_pause)
 
+    @log.logger.catch
     def ads_data(self):
         from avito import Check_ad
 
-        self.logger.info('Начало проверки объявлений')
+        log.logger.info('Начало проверки объявлений')
         ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
         while ads:
             with self.lock:
@@ -283,7 +263,7 @@ class AvitoRealty():
                     processed = read_write_data(self, path=datas.Paths().processed_links, action='read')
                 ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
                 ad = ads.pop(0)
-                self.logger.info('Проверка объявления {}'.format(ad))
+                log.logger.info('Проверка объявления {}'.format(ad))
                 read_write_data(self, path=datas.Paths().ads_link, var=ads, action='write')
                 processed.append(ad)
                 read_write_data(self, path=datas.Paths().processed_links, var=processed, action='write')
@@ -292,7 +272,7 @@ class AvitoRealty():
                 ad_info, ip_is_blocked = Check_ad.check_ad_browser(url=ad, driver=self.driver)
 
                 if ip_is_blocked == True: 
-                    self.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
+                    log.logger.info('IP адрес заблокирован на авито. Перезагрузка chromedriver для смены ip/proxy')
                     self.driver = startBrowser(self)
                     with self.lock:
                         ads = read_write_data(self, path=datas.Paths().ads_link, action='read')
@@ -312,10 +292,10 @@ class AvitoRealty():
                     processed.remove(ad)
                     read_write_data(self, path=datas.Paths().processed_links, var=processed, action='write')
 
-                self.logger.error('Не удалось получить данные объявления {}'.format(traceback.format_exc()))
+                log.logger.error('Не удалось получить данные объявления {}'.format(traceback.format_exc()))
 
                 time_pause = time_wait()
-                self.logger.info(f'Ожидание: {time_pause} сек')
+                log.logger.info(f'Ожидание: {time_pause} сек')
                 time.sleep(time_pause)
                 continue
             try:
@@ -326,7 +306,7 @@ class AvitoRealty():
                     for image in images:
                         try: images_str += f'{image["1280x960"]}\n'
                         except: 
-                            self.logger.debug('Не найдено изображение с разрешением 1280x960')
+                            log.logger.debug('Не найдено изображение с разрешением 1280x960')
                             continue
 
                     params = ad_info['paramsDto']['items']
@@ -342,12 +322,12 @@ class AvitoRealty():
                                 if '*' in param['description']: param_dict[param["title"]] = ad_info["contextItem"]["raw_params"][str(params[param]["attributeId"]).replace("&nbsp;", " ")]
                                 else: param_dict[param["title"]] = param["description"].replace("&nbsp;", " ")
                             except: 
-                                self.logger.info('Не удалось обработать параметр {}'.format(param))
+                                log.logger.info('Не удалось обработать параметр {}'.format(param))
                                 continue
 
                     description = ad_info['contextItem']['description']
                     tag_for_delete = {'<p>': '', '</p>': '\n', '<b>': '', '</b>': '', '<br>': '', '</br>': '', '<li>': '', '</li>': '\n', '<ul>': '\n', '</ul>': '', '<br />': '', ';': ''}
-                    self.logger.info('Очистка html тегов из описания')
+                    log.logger.info('Очистка html тегов из описания')
                     for tag in list(tag_for_delete.keys()):
                         description = description.replace(tag, tag_for_delete[tag])
 
@@ -374,68 +354,71 @@ class AvitoRealty():
                     ad_data = datas.Ad_Data(**data)
 
                     with self.lock:
-                        self.logger.info('Полученные данные объявления {}'.format(data))
+                        log.logger.info('Полученные данные объявления {}'.format(data))
                         working_with_file.insert_table_PostgresSQL(datas.ParseSettings().db_access, ad_data, param_dict)
 
-            except: self.logger.error('Ошибка при сохранении данных\n{}'.format(traceback.format_exc()))
+            except: log.logger.error('Ошибка при сохранении данных\n{}'.format(traceback.format_exc()))
             finally:
                 time_pause = time_wait()
-                self.logger.info(f'Ожидание: {time_pause} сек')
+                log.logger.info(f'Ожидание: {time_pause} сек')
                 time.sleep(time_pause)
 
+    @log.logger.catch
     def checkNumAds(self):
-        self.logger.info('Формирование очереди ссылок')
-        check_count_ad_link = f'{self.search_link}'
+        log.logger.info('Формирование очереди ссылок')
         startBrowser(self)
-        self.driver.get(check_count_ad_link)
-        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
-        j = json.loads(soup.text)
-        total_ads = j['totalCount']
-        minPrice_filter = 0
-        maxPrice_filter = 0
-        step_price = 1000000
-        if total_ads > 5000:
-            result_ads = 0
-            maxPrice_filter += step_price
-            while result_ads < total_ads:
-                soup = j = ''
-                try:
-                    link = f'{self.search_link}&pmin={minPrice_filter}&pmax={maxPrice_filter}'
-                    self.driver.get(link)
-                    soup = BeautifulSoup(self.driver.page_source, 'html.parser')
-                    j = json.loads(soup.text)
-                except: 
-                    self.logger.info('Не удалось получить данные')
-                    continue
-                count_ads = j['totalCount']
-                if (count_ads in range(4000, 5000) and (total_ads - result_ads) > 5000) or (result_ads + count_ads) >= total_ads:
-                    if (count_ads % 50)  != 0:
-                        for p in range(count_ads//50 + 1):
-                            self.search_links_list.put(f'{link}&p={p+1}')
-                    elif (count_ads % 50)  == 0:
-                        for p in range(1, count_ads//50):
-                            self.search_links_list.put(f'{link}&p={p+1}')
-                    self.logger.info(f'В очередь добавлены ссылки с диапозном цен: {minPrice_filter} - {maxPrice_filter}')
-                    step_price = 1000000
-                    minPrice_filter = maxPrice_filter + 1
-                    maxPrice_filter += step_price
-                    result_ads += count_ads
-                elif count_ads > 5000:
-                    step_price //= 2
-                    maxPrice_filter = maxPrice_filter - step_price
-                elif 3000 < count_ads < 4000:
-                    maxPrice_filter += step_price
-                elif count_ads < 3000:
-                    step_price *= 2
-                    maxPrice_filter += step_price
+        for search_link in self.search_links:
+            check_count_ad_link = search_link
+            self.driver.get(check_count_ad_link)
+            soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+            j = json.loads(soup.text)
+            total_ads = j['totalCount']
+            minPrice_filter = 0
+            maxPrice_filter = 0
+            step_price = 1000000
+            if total_ads > 5000:
+                result_ads = 0
+                maxPrice_filter += step_price
+                while result_ads < total_ads:
+                    soup = j = ''
+                    try:
+                        link = f'{search_link}&pmin={minPrice_filter}&pmax={maxPrice_filter}'
+                        self.driver.get(link)
+                        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+                        j = json.loads(soup.text)
+                    except: 
+                        log.logger.info('Не удалось получить данные')
+                        continue
+                    count_ads = j['totalCount']
+                    if (count_ads in range(4000, 5000) and (total_ads - result_ads) > 5000) or (result_ads + count_ads) >= total_ads:
+                        if (count_ads % 50)  != 0:
+                            for p in range(count_ads//50 + 1):
+                                self.search_links_list.put(f'{link}&p={p+1}')
+                        elif (count_ads % 50)  == 0:
+                            for p in range(1, count_ads//50):
+                                self.search_links_list.put(f'{link}&p={p+1}')
+                        log.logger.info(f'В очередь добавлены ссылки с диапозном цен: {minPrice_filter} - {maxPrice_filter}')
+                        step_price = 1000000
+                        minPrice_filter = maxPrice_filter + 1
+                        maxPrice_filter += step_price
+                        result_ads += count_ads
+                    elif count_ads > 5000:
+                        step_price //= 2
+                        maxPrice_filter = maxPrice_filter - step_price
+                    elif 3000 < count_ads < 4000:
+                        maxPrice_filter += step_price
+                    elif count_ads < 3000:
+                        step_price *= 2
+                        maxPrice_filter += step_price
 
-        else: 
-            if (total_ads % 50)  != 0:
-                for p in range(total_ads//50 + 1):
-                    self.search_links_list.put(f'{check_count_ad_link}&p={p+1}')
-            elif (total_ads % 50)  == 0:
-                for p in range(1, total_ads//50):
-                    self.search_links_list.put(f'{check_count_ad_link}&p={p+1}')
+            else: 
+                if (total_ads % 50)  != 0:
+                    for p in range(total_ads//50 + 1):
+                        self.search_links_list.put(f'{check_count_ad_link}&p={p+1}')
+                elif (total_ads % 50)  == 0:
+                    for p in range(1, total_ads//50):
+                        self.search_links_list.put(f'{check_count_ad_link}&p={p+1}')
+        log.logger.info('Завершение формирование очереди ссылок. Закрытие selenium барузера')
         self.driver.close()
         self.driver.quit()
         # return search_links_list

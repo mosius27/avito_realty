@@ -4,9 +4,12 @@ import yaml
 import os
 import time
 import multiprocessing
+import other.logger as log
+log.Logging()
 
 class Beginnig_browser():
 
+    @log.logger.catch
     def chrome(proxy: str = None, settings_path: str = f'{os.path.dirname(os.path.abspath(__file__))}\\settings debug.yml', logLvl: str = 'debug', logPath: str = f"{os.path.dirname(os.path.abspath(__file__))}\\logs\\{multiprocessing.current_process().name}.log", *args, **kwargs):
         from selenium.webdriver import Chrome
         from selenium.webdriver import ChromeOptions as Options
@@ -21,6 +24,7 @@ class Beginnig_browser():
             
         # Добавление аргументов запуска для браузера
         if proxy != None:
+            log.logger.info('добавление прокси {}'.format(proxy))
             from proxy import create_ext
             if len(proxy.split(':')) == 4:
                 proxy = proxy.split(':')
@@ -29,6 +33,7 @@ class Beginnig_browser():
             if len(proxy.split(':')) == 2: options.add_argument(f'--proxy-server={proxy}')
 
         for arg in config['arguments']:
+            log.logger.info('Добавление аргумента {}'.format(arg))
             keys = config['arguments'][arg]
             if keys['activity'] == True:
                 if len(keys) < 3:
@@ -38,6 +43,7 @@ class Beginnig_browser():
 
         prefs_dict = {}
         for pref in config['experimental option']:
+            log.logger.info('Добавление experimental option: {}'.format(pref))
             keys = config['experimental option'][pref]
             try:
                 if keys['activity'] == True and keys['value'] != 'None':
@@ -55,9 +61,8 @@ class Beginnig_browser():
         for key in list(prefs_dict.keys()):
             options.add_experimental_option(key, prefs_dict[key])
             
+        log.logger.info('Запуск selenium браузера')
         driver = Chrome(executable_path=f'{os.path.dirname(os.path.abspath(__file__))}\\chromedriver.exe'.replace('\\', '/'), options=options)
-
-        # time.sleep(9999)
 
         return driver
 

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import json
-import logging
+import other.logger as log
+log.Logging()
 
 def get_ad_info(content):
     from bs4 import BeautifulSoup
@@ -43,28 +44,7 @@ def get_ad_info(content):
 
 class Check_ad():
 
-    def initLogger(path: str, logLvl: str):
-        with open(path, 'w', encoding='utf-8') as file: pass
-
-        logger = logging.getLogger()
-        formatter= logging.Formatter('log time - %(asctime)s | log level - %(levelname)s | [%(filename)s: line - %(lineno)d in function %(funcName)s] | %(message)s', datefmt='%Y-%m-%d %H:%M:%S')#, level=logLvl.upper())
-
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        console_handler.setLevel(logLvl.upper())
-        logger.addHandler(console_handler)
-
-        file_handler = logging.FileHandler(filename=path, encoding='utf-8')
-        file_handler.setFormatter(formatter)
-        file_handler.setLevel(logLvl.upper())
-        logger.addHandler(file_handler)
-
-        console_handler.setLevel(logLvl.upper())
-        file_handler.setLevel(logLvl.upper())
-        logger.setLevel(logLvl.upper())
-
-        return logger
-
+    @log.logger.catch
     def check_ad_request(url: str, **kwargs):
         import requests
         try: r = requests.get(url, kwargs)
@@ -73,10 +53,11 @@ class Check_ad():
         
         return ad_info['dto'], ip_is_blocked
 
+    @log.logger.catch
     def check_ad_browser(url: str, driver, **kwargs):
         try: 
             driver.get(url)
-        except: print('Не удалось загрузить страницу')
+        except: log.logger.info('Не удалось загрузить страницу - {}'.format(url))
         ad_info, ip_is_blocked = get_ad_info(driver.page_source)
 
         return ad_info, ip_is_blocked

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import json
+import other.logger as log
+log.Logging()
 
 from bs4 import BeautifulSoup
 
@@ -25,7 +27,7 @@ def query_tag(content):
         content = json.loads(j)
 
         if 'error' in list(content.keys()):
-            print(f'Не удалось открыть страницу по причине: {content["result"]["message"]}')
+            log.logger.info(f'Не удалось открыть страницу по причине: {content["result"]["message"]}')
             links = []
             is_lastPage = False
             ip_is_blocked = True
@@ -80,28 +82,30 @@ def default_tag(content):
 class Get_ads():
 
     @defenition_tag
+    @log.logger.catch
     def get_ads_request(url: str, **kwargs):
         import requests
 
         try: q = requests.get(url, kwargs)
-        except: return None
+        except: log.logger.info('Не удалось загрузить страницу - {}'.format(url))
 
         if kwargs['tag'] == 'query': result = query_tag(json.loads(q.content))
         if kwargs['tag'] == 'default': result = default_tag(q.text)
-        else: print('Неизвестный формат ссылки')
+        else: log.logger.info('Неизвестный формат ссылки - {}'.format(url))
 
         return result
 
     @defenition_tag
+    @log.logger.catch
     def get_ads_browser(url: str, driver, **kwargs):
 
         try: 
             driver.get(url)
-        except: print('Не удалось загрузить страницу')
+        except: log.logger.info('Не удалось загрузить страницу - {}'.format(url))
 
         if kwargs['tag'] == 'query': result, is_lastPage, ip_is_blocked = query_tag(driver.page_source)
         elif kwargs['tag'] == 'default': result, is_lastPage, ip_is_blocked = default_tag(driver.page_source)
-        else: print('Неизвестный формат ссылки')
+        else: log.logger.info('Неизвестный формат ссылки - {}'.format(url))
         
         return result, is_lastPage, ip_is_blocked
 

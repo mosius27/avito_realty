@@ -4,31 +4,10 @@ import yaml
 import json
 import csv
 from openpyxl import Workbook, load_workbook
-import logging
 import psycopg2
 
-def initLogger(path: str, logLvl: str):
-    import multiprocessing
-    with open(path, 'w', encoding='utf-8') as file: pass
-
-    logger = logging.getLogger(__name__)
-    formatter= logging.Formatter('{processName} | log time - %(asctime)s | log level - %(levelname)s | [%(filename)s: line - %(lineno)d in function %(funcName)s] | %(message)s'.format(processName=multiprocessing.current_process().name), datefmt='%Y-%m-%d %H:%M:%S')
-
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    console_handler.setLevel(logLvl.upper())
-    logger.addHandler(console_handler)
-
-    file_handler = logging.FileHandler(filename=path, encoding='utf-8')
-    file_handler.setFormatter(formatter)
-    file_handler.setLevel(logLvl.upper())
-    logger.addHandler(file_handler)
-
-    console_handler.setLevel(logLvl.upper())
-    file_handler.setLevel(logLvl.upper())
-    logger.setLevel(logLvl.upper())
-
-    return logger
+import other.logger as log
+log.Logging()
 
 def read_txt(path: str):
     var = []
@@ -99,11 +78,11 @@ def check_exists_collumn_postgresSQL(settings, var: str):
             )
             return cursor.fetchone()[0]
     except Exception as _ex:
-        print("[INFO] Error while working with PostgreSQL", _ex)
+        log.logger.info("[INFO] Error while working with PostgreSQL", _ex)
     finally:
         if connection:
             connection.close()
-            print("[INFO] PostgreSQL connection closed")
+            log.logger.info("[INFO] PostgreSQL connection closed")
 
 def create_table_PostgresSQL(settings, var: dict):
     try:
@@ -133,13 +112,13 @@ def create_table_PostgresSQL(settings, var: dict):
                 """
             )
             
-            print("[INFO] Table created successfully")
+            log.logger.info("[INFO] Table created successfully")
     except Exception as _ex:
-        print("[INFO] Error while working with PostgreSQL", _ex)
+        log.logger.info("[INFO] Error while working with PostgreSQL", _ex)
     finally:
         if connection:
             connection.close()
-            print("[INFO] PostgreSQL connection closed")
+            log.logger.info("[INFO] PostgreSQL connection closed")
 
 def insert_table_PostgresSQL(settings, var: dict, params: dict):
     try:
@@ -170,14 +149,14 @@ def insert_table_PostgresSQL(settings, var: dict, params: dict):
         with connection.cursor() as cursor:
             cursor.execute(f"INSERT INTO {settings['table_name']} ({keys}) VALUES({values});")
             
-            print("[INFO] Data was successfully inserted")
+            log.logger.info("[INFO] Data was successfully inserted")
 
     except Exception as _ex:
-        print("[INFO] Error while working with PostgreSQL", _ex)
+        log.logger.info("[INFO] Error while working with PostgreSQL", _ex)
     finally:
         if connection:
             connection.close()
-            print("[INFO] PostgreSQL connection closed")
+            log.logger.info("[INFO] PostgreSQL connection closed")
 
 def add_column_PostgresSQL(settings, var: str):
     try:
@@ -196,8 +175,8 @@ def add_column_PostgresSQL(settings, var: str):
                 f"ALTER TABLE {settings['table_name']} ADD COLUMN {var} text")
 
     except Exception as _ex:
-        print("[INFO] Error while working with PostgreSQL", _ex)
+        log.logger.info("[INFO] Error while working with PostgreSQL", _ex)
     finally:
         if connection:
             connection.close()
-            print("[INFO] PostgreSQL connection closed")
+            log.logger.info("[INFO] PostgreSQL connection closed")
