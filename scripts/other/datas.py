@@ -29,15 +29,3 @@ class Paths(BaseModel):
     locations: str=paths_settings['locations']
     categories: str=paths_settings['categories']
     proxy: str=paths_settings['proxy']
-
-class Ad_Data(BaseModel):
-    Дата_публикации: str
-    Заголовок: str
-    Тип_недвижимости: str
-    Описание: str
-    Цена: str
-    Регион: str
-    Город: str
-    Адрес: str
-    Url: str
-    Изображения: str

@@ -6,7 +6,7 @@ import csv
 from openpyxl import Workbook, load_workbook
 import psycopg2
 
-import other.logger as log
+import scripts.other.logger as log
 log.Logging()
 
 def read_txt(path: str):
