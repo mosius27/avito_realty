@@ -8,6 +8,7 @@ table = declarative_base()
 
 class Base_Data(table):
     __tablename__ = settings.DATABASE_TABLE_NAME
+    
     Id= Column (Integer, primary_key=True, autoincrement=True)
     Дата_публикации= Column(DateTime)
     Заголовок= Column(Text)

@@ -3,8 +3,8 @@ db_access:
   host: 127.0.0.1
   port: 5432
   user: postgres
-  password: kjr84!vfibyf_228
-  db_name: test
+  password: home!db_228
+  db_name: postgres
   table_name: test
 
 # Осуществлять полный сбор объявлений
