@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import create_engine, MetaData, Table, FetchedValue, inspect
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, MetaData, Table, FetchedValue, inspect, Column, Integer
+from sqlalchemy.orm import sessionmaker, Query, query
+from sqlalchemy.sql import exists
 from db_settings import settings
 import db_model as model
 
