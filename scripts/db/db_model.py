@@ -1,7 +1,7 @@
 # -*- coding= utf-8 -*-
 
 from sqlalchemy import Column, Integer, Text, DateTime, create_engine, MetaData, Text
-from db_settings import settings
+from .db_settings import settings
 from sqlalchemy.orm import declarative_base
 
 table = declarative_base()

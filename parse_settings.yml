@@ -1,20 +1,20 @@
 # Данные для доступа к базе данных
 db_access:
-  host: 127.0.0.1
-  port: 5432
-  user: postgres
-  password: home!db_228
-  db_name: postgres
-  table_name: test
+  host: 
+  port: 
+  user: 
+  password: 
+  db_name: 
+  table_name: 
 
 # Осуществлять полный сбор объявлений
-deep_scan: !!bool True
+deep_scan: !!bool False
 
 # Сбор объявлений за n дней
 look_up_date: !!int 2
 
 use_multiprocessing: !!bool True
-num_process: !!int 5
+num_process: !!int 4
 
 # Режим работы сбора ссылок и данных с объявлений
 # get_ads - собирать ссылки объявлений

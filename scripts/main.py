@@ -14,6 +14,7 @@ import other.read_write_files as working_with_file
 import other.create_search_link as create_search_link
 import other.datas as datas
 import other.logger as log
+from db.init_db import DB
 log.Logging()
 
 def time_wait():
@@ -40,6 +41,8 @@ def startBrowser(self):
     else: self.driver = Beginnig_browser.chrome(settings_path=datas.Paths().browser_settings)
 
 def beginning_programm(self):
+    with self.lock:
+        self.db = DB()
     if datas.ParseSettings().work_mode == 'get_ads' or datas.ParseSettings().work_mode == 'all':
         with self.lock:
             if self.search_links_list.qsize() == 0:
@@ -96,20 +99,6 @@ class AvitoRealty():
         self.checked_page = manager.list([])
         if datas.ParseSettings().work_mode == 'get_ads' or datas.ParseSettings().work_mode == 'all':
             self.search_links_list = Queue()
-
-        data = {'Дата_публикации': 'Дата_публикации',
-            'Заголовок': 'Заголовок',
-            'Тип_недвижимости': 'Тип_недвижимости',
-            'Описание': 'Описание',
-            'Цена': 'Цена',
-            'Регион': 'Регион',
-            'Город': 'Город',
-            'Адрес': 'Адрес',
-            'Url': 'Url',
-            'Изображения': 'Изображения'
-            }
-        data = datas.Ad_Data(**data)
-        working_with_file.create_table_PostgresSQL(datas.ParseSettings().db_access, data)
         
     def start(self):
         if datas.ParseSettings().use_multiprocessing == True:
@@ -316,8 +305,6 @@ class AvitoRealty():
                         param_dict = {}
                         for param in params:
                             param['title'] = param["title"].strip().replace(' ', '_')
-                            if working_with_file.check_exists_collumn_postgresSQL(datas.ParseSettings().db_access, param["title"]) == False:
-                                working_with_file.add_column_PostgresSQL(datas.ParseSettings().db_access, param["title"])
                             try:
                                 if '*' in param['description']: param_dict[param["title"]] = ad_info["contextItem"]["raw_params"][str(params[param]["attributeId"]).replace("&nbsp;", " ")]
                                 else: param_dict[param["title"]] = param["description"].replace("&nbsp;", " ")
@@ -351,11 +338,12 @@ class AvitoRealty():
                         'Изображения': images_str,
                         }
 
-                    ad_data = datas.Ad_Data(**data)
+                    for param in param_dict:
+                        data[param] = param_dict[param]
 
                     with self.lock:
                         log.logger.info('Полученные данные объявления {}'.format(data))
-                        working_with_file.insert_table_PostgresSQL(datas.ParseSettings().db_access, ad_data, param_dict)
+                        self.db.insert_data(data)
 
             except: log.logger.error('Ошибка при сохранении данных\n{}'.format(traceback.format_exc()))
             finally:

@@ -5,7 +5,8 @@ import json
 import csv
 from openpyxl import Workbook, load_workbook
 import psycopg2
-
+import sys
+sys.path.append('./')
 import scripts.other.logger as log
 log.Logging()
 
