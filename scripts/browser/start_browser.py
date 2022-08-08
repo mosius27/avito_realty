@@ -4,7 +4,7 @@ import yaml
 import os
 import time
 import multiprocessing
-import other.logger as log
+import scripts.other.logger as log
 log.Logging()
 
 class Beginnig_browser():

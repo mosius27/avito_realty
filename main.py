@@ -4,17 +4,15 @@ import json
 import time
 import random
 import traceback
-import multiprocessing
-import os
 from datetime import datetime, timedelta
 from multiprocessing import Process, RLock, Manager, Queue
 
 from bs4 import BeautifulSoup
-import other.read_write_files as working_with_file
-import other.create_search_link as create_search_link
-import other.datas as datas
-import other.logger as log
-from db.init_db import DB
+import scripts.other.read_write_files as working_with_file
+import scripts.other.create_search_link as create_search_link
+import scripts.other.datas as datas
+import scripts.other.logger as log
+from scripts.db.init_db import DB
 log.Logging()
 
 def time_wait():
@@ -23,7 +21,7 @@ def time_wait():
 # Функция запуска selenium браузера
 @log.logger.catch
 def startBrowser(self):
-    from browser import Beginnig_browser
+    from scripts.browser import Beginnig_browser
 
     try: 
         self.driver.close()
@@ -107,7 +105,7 @@ class AvitoRealty():
 
     @log.logger.catch
     def get_ads(self):
-        from avito import Get_ads
+        from scripts.avito import Get_ads
         months = {
             'янв': 1,
             'фев': 2,
@@ -242,7 +240,7 @@ class AvitoRealty():
 
     @log.logger.catch
     def ads_data(self):
-        from avito import Check_ad
+        from scripts.avito import Check_ad
 
         log.logger.info('Начало проверки объявлений')
         ads = read_write_data(self, path=datas.Paths().ads_link, action='read')

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-import other.logger as log
+import scripts.other.logger as log
 log.Logging()
 
 from bs4 import BeautifulSoup

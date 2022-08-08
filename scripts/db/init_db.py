@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sqlite3 import connect
-from sqlalchemy import create_engine, MetaData, Table, FetchedValue, inspect, Column, Integer, Text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, MetaData, Table, inspect, Column, Text
 import migrate.changeset as migrate
 import sys
 sys.path.append('./')
